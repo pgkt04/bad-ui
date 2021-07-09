@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Resource Files\ui">
+      <UniqueIdentifier>{a78db958-c9f3-479d-ab9a-6b963301ebcd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\objects">
+      <UniqueIdentifier>{5224d7b7-b833-4c43-a459-926cd3c7a1e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\draw">
+      <UniqueIdentifier>{4522d96f-347a-4d4e-b304-fc42ed07d4d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\objects\controls">
+      <UniqueIdentifier>{80680742-6e46-4c31-aba3-03394caa5d8a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\objects\controls\checkbox">
+      <UniqueIdentifier>{b7150f8f-bf1d-4703-b23a-488039b2ad02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\win_input">
+      <UniqueIdentifier>{e6bae381-ab76-43c2-82e2-35918b9c45b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\objects\parent">
+      <UniqueIdentifier>{e5574cc2-20dd-45f3-8f5e-d8db6a5b557b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\objects\parent\form">
+      <UniqueIdentifier>{39b1c87b-d024-4d96-963e-71a152426978}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\objects\parent\group">
+      <UniqueIdentifier>{bb9a6721-6465-4a1b-b645-468123fd08c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\objects\parent\tab">
+      <UniqueIdentifier>{ab97b3af-f68a-4615-ba6b-83b3250df0b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\objects\parent\group\columns">
+      <UniqueIdentifier>{681f27e2-0014-4974-943d-21d07fc413b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\external_input">
+      <UniqueIdentifier>{b4b837d3-9f71-4af0-90c1-9b7209f606c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\ui\objects\controls\slider">
+      <UniqueIdentifier>{e99c6109-c8bc-4f01-a515-603dc8d87845}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_form.cpp">
+      <Filter>Resource Files\ui\objects\parent\form</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_checkbox.cpp">
+      <Filter>Resource Files\ui\objects\controls\checkbox</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_group.cpp">
+      <Filter>Resource Files\ui\objects\parent\group</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_tab.cpp">
+      <Filter>Resource Files\ui\objects\parent\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_win_input.cpp">
+      <Filter>Resource Files\ui\win_input</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_object.cpp">
+      <Filter>Resource Files\ui\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_parent.cpp">
+      <Filter>Resource Files\ui\objects\parent</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_columns.cpp">
+      <Filter>Resource Files\ui\objects\parent\group\columns</Filter>
+    </ClCompile>
+    <ClCompile Include="external_input.cpp">
+      <Filter>Resource Files\ui\external_input</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_slider.cpp">
+      <Filter>Resource Files\ui\objects\controls\slider</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ui.h">
+      <Filter>Resource Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_form.h">
+      <Filter>Resource Files\ui\objects\parent\form</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_defs.h">
+      <Filter>Resource Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_draw.h">
+      <Filter>Resource Files\ui\draw</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_checkbox.h">
+      <Filter>Resource Files\ui\objects\controls\checkbox</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_group.h">
+      <Filter>Resource Files\ui\objects\parent\group</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_control.h">
+      <Filter>Resource Files\ui\objects\controls</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_tab.h">
+      <Filter>Resource Files\ui\objects\parent\tab</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_style.h">
+      <Filter>Resource Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_win_input.h">
+      <Filter>Resource Files\ui\win_input</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_object.h">
+      <Filter>Resource Files\ui\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_parent.h">
+      <Filter>Resource Files\ui\objects\parent</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_columns.h">
+      <Filter>Resource Files\ui\objects\parent\group\columns</Filter>
+    </ClInclude>
+    <ClInclude Include="external_input.h">
+      <Filter>Resource Files\ui\external_input</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_slider.h">
+      <Filter>Resource Files\ui\objects\controls\slider</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

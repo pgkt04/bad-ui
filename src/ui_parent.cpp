@@ -46,20 +46,14 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
   // Relocate all its children with the initial default first
   //
   auto dimensions = get_dimensions();
-  auto layout_dimensions = get_is_tab() ? get_parent_dimensions() : dimensions;
-  auto content_x = layout_dimensions.m_x + style_ptr->m_padding;
-  auto content_width = layout_dimensions.m_w - style_ptr->m_padding * 2.f;
-
-  if (content_width < 0.f)
-    content_width = 0.f;
-
   auto dynamic_height = dimensions.m_h - style_ptr->m_padding;
   auto dynamic_y = get_is_col() ? dimensions.m_y + style_ptr->m_padding :
     dimensions.m_y + style_ptr->m_control_height + style_ptr->m_padding;
-  auto dynamic_x = content_x;
+  auto dynamic_x = get_is_tab() ? get_parent_dimensions().m_x : get_is_col() ?
+    dimensions.m_x : dimensions.m_x + style_ptr->m_padding;
   auto dynamic_objects = 0;
   auto hidden_objects = 0;
-  auto dynamic_width = content_width;
+  auto dynamic_width = get_is_tab() ? get_parent_dimensions().m_w : dimensions.m_w;
 
   // Predetermine children height and width
   //
@@ -97,9 +91,10 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
   for (auto child : get_children())
   {
     child->set_dimensions(ui_dimension(
-        child->get_is_tab() ? content_x + (dynamic_width * static_cast<float>(ignore_index)) : dynamic_x,
+        child->get_is_tab() ? (this->get_is_tab() ? get_parent_dimensions().m_x : dimensions.m_x)
+        + (dynamic_width * static_cast<float>(ignore_index)) : dynamic_x,
         child->get_is_tab() ? (best_tab_pos != 0) ? best_tab_pos : dynamic_y : dynamic_y,
-        child->get_is_tab() ? dynamic_width : content_width,
+        child->get_is_tab() ? dynamic_width : (this->get_is_tab() ? get_parent_dimensions().m_w : dimensions.m_w),
         child->get_dynamic() ? dynamic_height : style_ptr->m_control_height
       ));
 
@@ -159,6 +154,11 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
         if (!child->get_dynamic())
           dynamic_y += style_ptr->m_padding + style_ptr->m_control_height;
 
+        // set x padding for non auto-filling children (aka all controls)
+        //
+        auto dim = child->get_dimensions();
+        dim.m_x += style_ptr->m_padding;
+        child->set_dimensions(dim);
       }
     }
   }

@@ -1,6 +1,7 @@
 #include "ui_slider.h"
 
 #include <cstdio>
+#include <cstring>
 
 static float clamp_slider_value(float value)
 {
@@ -79,8 +80,8 @@ void ui_slider::render(std::shared_ptr<ui_draw> draw_ptr)
   auto fill_area = slider_area;
   fill_area.m_w *= value;
 
-  char label[128];
-  std::snprintf(label, sizeof(label), "%s: %.2f", m_name, value);
+  char value_text[32];
+  std::snprintf(value_text, sizeof(value_text), "%.2f", value);
 
   draw_ptr->draw_rectangle(slider_area, style->m_foreground);
 
@@ -92,5 +93,9 @@ void ui_slider::render(std::shared_ptr<ui_draw> draw_ptr)
   auto handle = ui_dimension(handle_x, slider_area.m_y, handle_width, slider_area.m_h);
   draw_ptr->draw_rectangle(handle, style->m_text);
 
-  draw_ptr->draw_text(label, dim.m_x, dim.m_y, style->m_text);
+  auto value_text_width = static_cast<float>(std::strlen(value_text)) * 6.f;
+  auto value_text_x = slider_area.m_x + (slider_area.m_w - value_text_width) * 0.5f;
+
+  draw_ptr->draw_text(m_name, dim.m_x, dim.m_y, style->m_text);
+  draw_ptr->draw_text(value_text, value_text_x, slider_area.m_y, style->m_text);
 }

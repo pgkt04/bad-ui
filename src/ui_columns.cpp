@@ -23,7 +23,29 @@ bool ui_column::think(std::shared_ptr<ui_style> style_ptr)
 {
   set_style(style_ptr);
 
+  auto outer = get_dimensions();
+
+  if (m_visible)
+  {
+    auto inner = outer;
+    inner.m_x += 1.f;
+    inner.m_y += 1.f;
+    inner.m_w -= 2.f;
+    inner.m_h -= 2.f;
+
+    if (inner.m_w < 0.f)
+      inner.m_w = 0.f;
+
+    if (inner.m_h < 0.f)
+      inner.m_h = 0.f;
+
+    set_dimensions(inner);
+  }
+
   handle_relocations(style_ptr);
+
+  if (m_visible)
+    set_dimensions(outer);
 
   for (auto child : get_children())
     child->think(style_ptr);

@@ -35,7 +35,6 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
   auto this_dimension = get_dimensions();
   auto cols = m_splits.size() + 1;
   auto col_width = this_dimension.m_w / cols;
-  auto border_size = m_visible ? 1.f : 0.f;
 
   if (!m_init)
   {
@@ -109,10 +108,10 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
   for (auto child : get_children())
   {
     auto dim = child->get_dimensions();
-    dim.m_x = this_dimension.m_x + col_width * i + style_ptr->m_padding + border_size;
-    dim.m_y = this_dimension.m_y + border_size;
-    dim.m_w = col_width - style_ptr->m_padding * 2.f - border_size * 2.f;
-    dim.m_h = this_dimension.m_h - (style_ptr->m_padding + style_ptr->m_control_height) - border_size * 2.f;
+    dim.m_x = this_dimension.m_x + col_width * i + style_ptr->m_padding;
+    dim.m_y = this_dimension.m_y;
+    dim.m_w = col_width - style_ptr->m_padding * 2.f;
+    dim.m_h = this_dimension.m_h - (style_ptr->m_padding + style_ptr->m_control_height);
 
     if (dim.m_w < 0.f)
       dim.m_w = 0.f;

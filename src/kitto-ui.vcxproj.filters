@@ -52,6 +52,9 @@
     <Filter Include="Resource Files\ui\objects\controls\slider">
       <UniqueIdentifier>{e99c6109-c8bc-4f01-a515-603dc8d87845}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\ui\objects\controls\dropdown">
+      <UniqueIdentifier>{5a1edb3e-36c5-4ac5-bf09-ddcff78f6a4f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -86,6 +89,9 @@
     </ClCompile>
     <ClCompile Include="ui_slider.cpp">
       <Filter>Resource Files\ui\objects\controls\slider</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_dropdown.cpp">
+      <Filter>Resource Files\ui\objects\controls\dropdown</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="ui_slider.h">
       <Filter>Resource Files\ui\objects\controls\slider</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_dropdown.h">
+      <Filter>Resource Files\ui\objects\controls\dropdown</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

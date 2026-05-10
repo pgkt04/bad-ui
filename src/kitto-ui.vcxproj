@@ -147,6 +147,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ui_checkbox.cpp" />
     <ClCompile Include="ui_columns.cpp" />
+    <ClCompile Include="ui_dropdown.cpp" />
     <ClCompile Include="ui_form.cpp" />
     <ClCompile Include="ui_group.cpp" />
     <ClCompile Include="ui_parent.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="ui_checkbox.h" />
     <ClInclude Include="ui_columns.h" />
     <ClInclude Include="ui_control.h" />
+    <ClInclude Include="ui_dropdown.h" />
     <ClInclude Include="ui_group.h" />
     <ClInclude Include="ui_parent.h" />
     <ClInclude Include="ui_slider.h" />

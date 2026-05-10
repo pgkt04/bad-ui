@@ -3,6 +3,7 @@
 ui_input win_input::get_input(UINT message, WPARAM wParam, LPARAM lParam)
 {
   static ui_input ret = {};
+  ret.handled = false;
 
   switch (message)
   {

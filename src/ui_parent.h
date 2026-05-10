@@ -12,5 +12,6 @@ public:
 
   void add_child(std::shared_ptr<ui_object> object);
   std::vector<std::shared_ptr<ui_object>> get_children();
+  void input_children(ui_input& input);
   void handle_relocations(std::shared_ptr<ui_style> style_ptr);
 };

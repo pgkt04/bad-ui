@@ -50,10 +50,7 @@ void ui_tab::input(ui_input& input)
   }
 
   if (get_selected())
-  {
-    for (auto child : get_children())
-      child->input(input);
-  }
+    input_children(input);
 }
 
 void ui_tab::render(std::shared_ptr<ui_draw> draw_ptr)

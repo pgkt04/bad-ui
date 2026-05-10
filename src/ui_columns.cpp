@@ -16,9 +16,7 @@ void ui_column::push(std::shared_ptr<ui_object> object)
 void ui_column::input(ui_input& input)
 {
   set_input(input);
-
-  for (auto child : get_children())
-    child->input(input);
+  input_children(input);
 }
 
 bool ui_column::think(std::shared_ptr<ui_style> style_ptr)
@@ -51,5 +49,14 @@ void ui_column::render(std::shared_ptr<ui_draw> draw_ptr)
   }
 
   for (auto child : get_children())
-    child->render(draw_ptr);
+  {
+    if (!child->get_render_last())
+      child->render(draw_ptr);
+  }
+
+  for (auto child : get_children())
+  {
+    if (child->get_render_last())
+      child->render(draw_ptr);
+  }
 }

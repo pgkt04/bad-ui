@@ -76,8 +76,7 @@ void ui_form::input(ui_input& input)
       set_selected(true);
   }
 
-  for (auto child : get_children())
-    child->input(input);
+  input_children(input);
 }
 
 void ui_form::render(std::shared_ptr<ui_draw> draw_ptr)

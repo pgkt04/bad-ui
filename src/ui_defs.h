@@ -236,6 +236,7 @@ struct ui_input
 {
   ui_mouse mouse;
   ui_keymap keymap;
+  bool handled;
 };
 
 #define UI_IN_AREA(mouse, dimension) (mouse.pos_x > dimension.m_x) \

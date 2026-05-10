@@ -87,7 +87,11 @@ static std::shared_ptr<ui_style> create_style()
 static std::shared_ptr<ui_form> create_ui()
 {
   static bool selected = false;
-  static float slider_value = 0.5f;
+  static float tab2_slider_value = 0.5f;
+  static float subtab_slider_value = 0.25f;
+  static const char* dropdown_items[] = { "First", "Second", "Third" };
+  static int tab2_dropdown_value = 0;
+  static int subtab_dropdown_value = 1;
 
   auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Title", 0, false);
   {
@@ -95,7 +99,6 @@ static std::shared_ptr<ui_form> create_ui()
     {
       tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
       tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_slider>("Slider", &slider_value));
     }
     form->push(tab);
 
@@ -104,10 +107,14 @@ static std::shared_ptr<ui_form> create_ui()
       auto group1 = std::make_shared<ui_group>(true);
       {
         group1->push(std::make_shared<ui_checkbox>("Checkbox 5", &selected));
+        group1->push(std::make_shared<ui_slider>("Tab 2 Slider", &tab2_slider_value));
+        group1->push(std::make_shared<ui_dropdown>("Tab 2 Mode", dropdown_items, 3, &tab2_dropdown_value));
 
         auto tab_group1 = std::make_shared<ui_tab>("Tab 1");
         {
           tab_group1->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+          tab_group1->push(std::make_shared<ui_slider>("Sub Slider", &subtab_slider_value));
+          tab_group1->push(std::make_shared<ui_dropdown>("Sub Mode", dropdown_items, 3, &subtab_dropdown_value));
           tab_group1->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
         }
         group1->push(tab_group1);
@@ -150,7 +157,10 @@ static std::shared_ptr<ui_form> create_ui()
 static void send_input()
 {
   if (g_form)
+  {
+    g_input.handled = false;
     g_form->input(g_input);
+  }
 }
 
 @interface BadUIView : NSView

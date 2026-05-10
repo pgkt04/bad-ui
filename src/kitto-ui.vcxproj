@@ -155,6 +155,7 @@
     <ClCompile Include="ui_group.cpp" />
     <ClCompile Include="ui_parent.cpp" />
     <ClCompile Include="ui_slider.cpp" />
+    <ClCompile Include="ui_text.cpp" />
     <ClCompile Include="ui_win_input.cpp" />
     <ClCompile Include="ui_object.cpp" />
     <ClCompile Include="ui_tab.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="ui_group.h" />
     <ClInclude Include="ui_parent.h" />
     <ClInclude Include="ui_slider.h" />
+    <ClInclude Include="ui_text.h" />
     <ClInclude Include="ui_win_input.h" />
     <ClInclude Include="ui_object.h" />
     <ClInclude Include="ui_defs.h" />

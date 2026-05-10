@@ -12,6 +12,7 @@ COMMON_SRC := \
 	src/ui_columns.cpp \
 	src/ui_checkbox.cpp \
 	src/ui_button.cpp \
+	src/ui_text.cpp \
 	src/ui_slider.cpp \
 	src/ui_dropdown.cpp \
 	src/ui_color_picker.cpp

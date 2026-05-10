@@ -105,6 +105,9 @@
     <ClCompile Include="ui_button.cpp">
       <Filter>Resource Files\ui\objects\controls\button</Filter>
     </ClCompile>
+    <ClCompile Include="ui_text.cpp">
+      <Filter>Resource Files\ui\objects\controls</Filter>
+    </ClCompile>
     <ClCompile Include="ui_color_picker.cpp">
       <Filter>Resource Files\ui\objects\controls\color_picker</Filter>
     </ClCompile>
@@ -163,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="ui_button.h">
       <Filter>Resource Files\ui\objects\controls\button</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_text.h">
+      <Filter>Resource Files\ui\objects\controls</Filter>
     </ClInclude>
     <ClInclude Include="ui_color_picker.h">
       <Filter>Resource Files\ui\objects\controls\color_picker</Filter>

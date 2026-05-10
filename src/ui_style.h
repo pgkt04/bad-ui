@@ -14,6 +14,8 @@ public:
   float m_window_rounding = 0.f;
   bool m_window_resize_enabled = false;
   bool m_hide_os_cursor = false;
+  bool m_group_rounding_enabled = false;
+  float m_group_rounding = 0.f;
   float m_padding = 5.f;
   float m_control_height = 15.f;
 };

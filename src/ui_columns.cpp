@@ -1,4 +1,60 @@
 #include "ui_columns.h"
+#include <cmath>
+
+static float clamp_rounding(float value)
+{
+  if (value < 0.f)
+    return 0.f;
+
+  if (value > 1.f)
+    return 1.f;
+
+  return value;
+}
+
+static float rounded_rect_radius(ui_dimension dimension, float rounding)
+{
+  auto max_radius = dimension.m_w < dimension.m_h ? dimension.m_w * 0.5f : dimension.m_h * 0.5f;
+
+  return max_radius * clamp_rounding(rounding);
+}
+
+static void draw_rounded_rect(std::shared_ptr<ui_draw> draw_ptr, ui_dimension dimension, ui_color color, float radius)
+{
+  if (radius <= 0.f)
+  {
+    draw_ptr->draw_rectangle(dimension, color);
+    return;
+  }
+
+  auto y0 = static_cast<int>(std::floor(dimension.m_y));
+  auto y1 = static_cast<int>(std::ceil(dimension.m_y + dimension.m_h));
+
+  for (auto y = y0; y < y1; y++)
+  {
+    auto fy = static_cast<float>(y) + 0.5f;
+    auto inset = 0.f;
+    auto top_distance = fy - dimension.m_y;
+    auto bottom_distance = dimension.m_y + dimension.m_h - fy;
+
+    if (top_distance < radius)
+    {
+      auto dy = radius - top_distance;
+      inset = radius - std::sqrt(radius * radius - dy * dy);
+    }
+    else if (bottom_distance < radius)
+    {
+      auto dy = radius - bottom_distance;
+      inset = radius - std::sqrt(radius * radius - dy * dy);
+    }
+
+    auto x = dimension.m_x + inset;
+    auto w = dimension.m_w - inset * 2.f;
+
+    if (w > 0.f)
+      draw_ptr->draw_rectangle(ui_dimension(x, static_cast<float>(y), w, 1.f), color);
+  }
+}
 
 ui_column::ui_column(bool visible)
 {
@@ -63,15 +119,21 @@ void ui_column::render(std::shared_ptr<ui_draw> draw_ptr)
   //
   if (m_visible)
   {
-    // TODO:
-    //
-    draw_ptr->draw_rectangle(get_dimensions(), get_style()->m_text);
+    auto style = get_style();
+    auto radius = style->m_group_rounding_enabled ?
+      rounded_rect_radius(get_dimensions(), style->m_group_rounding) : 0.f;
+
+    draw_rounded_rect(draw_ptr, get_dimensions(), style->m_text, radius);
     auto inner = get_dimensions();
     inner.m_x += 1;
     inner.m_y += 1;
     inner.m_w -= 2;
     inner.m_h -= 2;
-    draw_ptr->draw_rectangle(inner, get_style()->m_background);
+
+    if (radius > 1.f)
+      radius -= 1.f;
+
+    draw_rounded_rect(draw_ptr, inner, style->m_background, radius);
   }
 
   render_children(draw_ptr, get_scroll_enabled());

@@ -13,6 +13,8 @@ std::shared_ptr<ui_style> demo_create_style()
   style->m_window_rounding = 0.08f;
   style->m_window_resize_enabled = true;
   style->m_hide_os_cursor = true;
+  style->m_group_rounding_enabled = true;
+  style->m_group_rounding = 0.025f;
   return style;
 }
 

@@ -30,6 +30,17 @@ static ui_dimension get_slider_area(ui_dimension dimension, std::shared_ptr<ui_s
   );
 }
 
+static ui_color slider_value_text_color(std::shared_ptr<ui_style> style, float value, float value_text_x, float value_text_width, ui_dimension slider_area)
+{
+  auto text_center = value_text_x + value_text_width * 0.5f;
+  auto fill_edge = slider_area.m_x + slider_area.m_w * value;
+
+  if (text_center <= fill_edge)
+    return style->m_background;
+
+  return style->m_text;
+}
+
 ui_slider::ui_slider(const char* name, float* value)
 {
   m_name = name;
@@ -95,7 +106,8 @@ void ui_slider::render(std::shared_ptr<ui_draw> draw_ptr)
 
   auto value_text_width = static_cast<float>(std::strlen(value_text)) * 6.f;
   auto value_text_x = slider_area.m_x + (slider_area.m_w - value_text_width) * 0.5f;
+  auto value_text_color = slider_value_text_color(style, value, value_text_x, value_text_width, slider_area);
 
   draw_ptr->draw_text(m_name, dim.m_x, dim.m_y, style->m_text);
-  draw_ptr->draw_text(value_text, value_text_x, slider_area.m_y, style->m_text);
+  draw_ptr->draw_text(value_text, value_text_x, slider_area.m_y, value_text_color);
 }

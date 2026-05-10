@@ -49,7 +49,20 @@ static ui_dimension get_scroll_viewport(ui_object* object, std::shared_ptr<ui_st
 
 static bool intersects_vertical(ui_dimension dimension, ui_dimension viewport)
 {
+  return dimension.m_y + dimension.m_h >= viewport.m_y && dimension.m_y <= viewport.m_y + viewport.m_h;
+}
+
+static bool fits_vertical(ui_dimension dimension, ui_dimension viewport)
+{
   return dimension.m_y >= viewport.m_y && dimension.m_y + dimension.m_h <= viewport.m_y + viewport.m_h;
+}
+
+static bool is_child_visible(std::shared_ptr<ui_object> child, ui_dimension viewport)
+{
+  if (child->get_dynamic())
+    return intersects_vertical(child->get_dimensions(), viewport);
+
+  return fits_vertical(child->get_dimensions(), viewport);
 }
 
 static ui_dimension get_scrollbar_track(ui_dimension viewport)
@@ -133,7 +146,7 @@ void ui_parent::input_children(ui_input& input)
 
   for (auto child : get_children())
   {
-    if (child->get_render_last() && intersects_vertical(child->get_dimensions(), viewport))
+    if (child->get_render_last() && is_child_visible(child, viewport))
     {
       child->input(input);
 
@@ -144,7 +157,7 @@ void ui_parent::input_children(ui_input& input)
 
   for (auto child : get_children())
   {
-    if (!child->get_render_last() && intersects_vertical(child->get_dimensions(), viewport))
+    if (!child->get_render_last() && is_child_visible(child, viewport))
     {
       child->input(input);
 
@@ -350,13 +363,13 @@ void ui_parent::render_children(std::shared_ptr<ui_draw> draw_ptr)
 
   for (auto child : get_children())
   {
-    if (!child->get_render_last() && intersects_vertical(child->get_dimensions(), viewport))
+    if (!child->get_render_last() && is_child_visible(child, viewport))
       child->render(draw_ptr);
   }
 
   for (auto child : get_children())
   {
-    if (child->get_render_last() && intersects_vertical(child->get_dimensions(), viewport))
+    if (child->get_render_last() && is_child_visible(child, viewport))
       child->render(draw_ptr);
   }
 

@@ -16,96 +16,108 @@ std::shared_ptr<ui_style> demo_create_style()
 
 std::shared_ptr<ui_form> demo_create_ui()
 {
-  static bool selected = false;
-  static float tab2_slider_value = 0.5f;
-  static float subtab_slider_value = 0.25f;
-  static const char* dropdown_items[] = { "First", "Second", "Third" };
-  static int tab2_dropdown_value = 0;
-  static int subtab_dropdown_value = 1;
+  static bool notifications = true;
+  static bool compact_mode = false;
+  static bool sync_enabled = true;
+  static bool scroll_items[18] = {};
+  static float volume = 0.5f;
+  static float brightness = 0.75f;
+  static float nested_value = 0.25f;
+  static const char* mode_items[] = { "Browse", "Edit", "Review" };
+  static const char* quality_items[] = { "Low", "Medium", "High" };
+  static int mode = 0;
+  static int quality = 2;
   static ui_color demo_color = ui_color(128, 64, 255, 255);
 
-  auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Title", 0, false);
+  auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Kitto UI Demo", 0, false);
   {
-    auto tab = std::make_shared<ui_tab>("Tab 1");
+    auto controls_tab = std::make_shared<ui_tab>("Controls");
     {
-      tab->push(std::make_shared<ui_text>("Plain text label"));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-    }
-    form->push(tab);
-
-    auto tab2 = std::make_shared<ui_tab>("Tab 2");
-    {
-      auto group1 = std::make_shared<ui_group>(true);
+      auto controls_group = std::make_shared<ui_group>(false);
       {
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 5", &selected));
-        group1->push(std::make_shared<ui_slider>("Tab 2 Slider", &tab2_slider_value));
-        group1->push(std::make_shared<ui_dropdown>("Tab 2 Mode", dropdown_items, 3, &tab2_dropdown_value));
-        group1->push(std::make_shared<ui_button>("Toggle Checks", [] { selected = !selected; }));
-
-        auto tab_group1 = std::make_shared<ui_tab>("Tab 1");
+        auto basic_group = std::make_shared<ui_group>(true);
         {
-          tab_group1->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-          tab_group1->push(std::make_shared<ui_slider>("Sub Slider", &subtab_slider_value));
-          tab_group1->push(std::make_shared<ui_dropdown>("Sub Mode", dropdown_items, 3, &subtab_dropdown_value));
-          tab_group1->push(std::make_shared<ui_button>("Sub Button", [] { selected = !selected; }));
-          tab_group1->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+          basic_group->push(std::make_shared<ui_text>("Basic controls"));
+          basic_group->push(std::make_shared<ui_checkbox>("Notifications", &notifications));
+          basic_group->push(std::make_shared<ui_checkbox>("Compact mode", &compact_mode));
+          basic_group->push(std::make_shared<ui_slider>("Volume", &volume));
+          basic_group->push(std::make_shared<ui_slider>("Brightness", &brightness));
+          basic_group->push(std::make_shared<ui_dropdown>("Mode", mode_items, 3, &mode));
+          basic_group->push(std::make_shared<ui_dropdown>("Quality", quality_items, 3, &quality));
+          basic_group->push(std::make_shared<ui_button>("Toggle Notifications", [] { notifications = !notifications; }));
         }
-        group1->push(tab_group1);
+        controls_group->push(basic_group);
 
-        auto tab_group2 = std::make_shared<ui_tab>("Tab 2");
+        controls_group->split();
+        auto color_group = std::make_shared<ui_group>(true);
         {
-          tab_group2->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+          color_group->push(std::make_shared<ui_text>("Color and actions"));
+          color_group->push(std::make_shared<ui_color_picker>("Accent Color", &demo_color));
+          color_group->push(std::make_shared<ui_button>("Reset Color", [] { demo_color = ui_color(128, 64, 255, 255); }));
+          color_group->push(std::make_shared<ui_checkbox>("Preview enabled", &notifications));
         }
-        group1->push(tab_group2);
+        controls_group->push(color_group);
 
-        group1->split();
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 5", &selected));
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 6", &selected));
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 7", &selected));
-        group1->split();
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 8", &selected));
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 9", &selected));
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 10", &selected));
-
-        auto group3 = std::make_shared<ui_group>(true);
+        auto scroll_group = std::make_shared<ui_group>(true);
         {
-          group3->push(std::make_shared<ui_group>(true));
-          group3->push(std::make_shared<ui_checkbox>("Checkbox 10", &selected));
+          scroll_group->push(std::make_shared<ui_text>("Scrollable demo"));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 01", &scroll_items[0]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 02", &scroll_items[1]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 03", &scroll_items[2]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 04", &scroll_items[3]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 05", &scroll_items[4]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 06", &scroll_items[5]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 07", &scroll_items[6]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 08", &scroll_items[7]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 09", &scroll_items[8]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 10", &scroll_items[9]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 11", &scroll_items[10]));
+          scroll_group->push(std::make_shared<ui_checkbox>("List item 12", &scroll_items[11]));
         }
-        group1->push(group3);
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 10", &selected));
+        controls_group->push(scroll_group);
       }
-      tab2->push(group1);
+      controls_tab->push(controls_group);
     }
-    form->push(tab2);
+    form->push(controls_tab);
 
-    // tab 3
+    auto layout_tab = std::make_shared<ui_tab>("Layout");
+    {
+      auto layout_group = std::make_shared<ui_group>(true);
+      {
+        layout_group->push(std::make_shared<ui_text>("Column one"));
+        layout_group->push(std::make_shared<ui_checkbox>("Sync enabled", &sync_enabled));
+        layout_group->push(std::make_shared<ui_slider>("Nested value", &nested_value));
+
+        auto nested_tab1 = std::make_shared<ui_tab>("Details");
+        {
+          nested_tab1->push(std::make_shared<ui_text>("Nested tabs stay in flow"));
+          nested_tab1->push(std::make_shared<ui_checkbox>("Use cached data", &compact_mode));
+          nested_tab1->push(std::make_shared<ui_button>("Flip Sync", [] { sync_enabled = !sync_enabled; }));
+        }
+        layout_group->push(nested_tab1);
+
+        auto nested_tab2 = std::make_shared<ui_tab>("Status");
+        {
+          nested_tab2->push(std::make_shared<ui_text>("Secondary nested panel"));
+          nested_tab2->push(std::make_shared<ui_checkbox>("Show hints", &notifications));
+        }
+        layout_group->push(nested_tab2);
+
+        layout_group->split();
+        layout_group->push(std::make_shared<ui_text>("Third column"));
+        layout_group->push(std::make_shared<ui_checkbox>("Pinned panel", &notifications));
+        layout_group->push(std::make_shared<ui_checkbox>("Rounded window", &compact_mode));
+        layout_group->push(std::make_shared<ui_button>("Enable Sync", [] { sync_enabled = true; }));
+      }
+      layout_tab->push(layout_group);
+    }
+    form->push(layout_tab);
+
     auto colors_tab = std::make_shared<ui_tab>("Colors");
     {
-      colors_tab->push(std::make_shared<ui_color_picker>("Demo Color", &demo_color));
-      colors_tab->push(std::make_shared<ui_button>("Reset Color", [] { demo_color = ui_color(128, 64, 255, 255); }));
-      colors_tab->push(std::make_shared<ui_checkbox>("Overlay Test", &selected));
+      colors_tab->push(std::make_shared<ui_text>("Shared color state"));
+      colors_tab->push(std::make_shared<ui_color_picker>("Accent Color", &demo_color));
+      colors_tab->push(std::make_shared<ui_checkbox>("Preview enabled", &notifications));
     }
     form->push(colors_tab);
   }

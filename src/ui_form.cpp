@@ -56,6 +56,27 @@ static void draw_rounded_rect_with_radius(std::shared_ptr<ui_draw> draw_ptr, ui_
   }
 }
 
+static void draw_cursor(std::shared_ptr<ui_draw> draw_ptr, float x, float y, ui_color color)
+{
+  auto shadow = ui_color(0, 0, 0, 180);
+
+  draw_ptr->draw_line(x + 1.f, y + 1.f, x + 1.f, y + 17.f, shadow);
+  draw_ptr->draw_line(x + 1.f, y + 1.f, x + 12.f, y + 12.f, shadow);
+  draw_ptr->draw_line(x + 1.f, y + 17.f, x + 5.f, y + 13.f, shadow);
+  draw_ptr->draw_line(x + 5.f, y + 13.f, x + 8.f, y + 20.f, shadow);
+  draw_ptr->draw_line(x + 8.f, y + 20.f, x + 10.f, y + 19.f, shadow);
+  draw_ptr->draw_line(x + 10.f, y + 19.f, x + 7.f, y + 12.f, shadow);
+  draw_ptr->draw_line(x + 7.f, y + 12.f, x + 12.f, y + 12.f, shadow);
+
+  draw_ptr->draw_line(x, y, x, y + 16.f, color);
+  draw_ptr->draw_line(x, y, x + 11.f, y + 11.f, color);
+  draw_ptr->draw_line(x, y + 16.f, x + 4.f, y + 12.f, color);
+  draw_ptr->draw_line(x + 4.f, y + 12.f, x + 7.f, y + 19.f, color);
+  draw_ptr->draw_line(x + 7.f, y + 19.f, x + 9.f, y + 18.f, color);
+  draw_ptr->draw_line(x + 9.f, y + 18.f, x + 6.f, y + 11.f, color);
+  draw_ptr->draw_line(x + 6.f, y + 11.f, x + 11.f, y + 11.f, color);
+}
+
 // parent class for all controls
 // tab_settings - 0 (none), 1 (top), 2 (bottom), 3 (left), 4 (right)
 //
@@ -177,5 +198,5 @@ void ui_form::render(std::shared_ptr<ui_draw> draw_ptr)
   }
 
   // render cursor
-  draw_ptr->draw_text("X", m_mouse.pos_x, m_mouse.pos_y, get_style()->m_accent);
+  draw_cursor(draw_ptr, m_mouse.pos_x, m_mouse.pos_y, style->m_accent);
 }

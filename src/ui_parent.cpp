@@ -3,6 +3,7 @@
 ui_parent::ui_parent()
 {
   m_children = {};
+  m_last_tab = -1;
 }
 
 void ui_parent::add_child(std::shared_ptr<ui_object> object)
@@ -31,8 +32,6 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
 
   // Predetermine children height and width
   //
-  bool was_last_col = false;
-
   for (auto child : get_children())
   {
     child->set_parent_dimensions(get_is_tab() ? get_parent_dimensions() : dimensions);

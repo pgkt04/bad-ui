@@ -1,5 +1,5 @@
 #include "ui_form.h"
-#include <Windows.h>
+#include <cmath>
 
 // parent class for all controls
 // tab_settings - 0 (none), 1 (top), 2 (bottom), 3 (left), 4 (right)
@@ -42,7 +42,7 @@ bool ui_form::think(std::shared_ptr<ui_style> style_ptr)
     dimensions.m_x += delta_x;
     dimensions.m_y += delta_y;
 
-    if (abs(delta_x) > 1.f || abs(delta_y) > 1.f)
+    if (std::abs(delta_x) > 1.f || std::abs(delta_y) > 1.f)
       set_dimensions(dimensions);
   }
 

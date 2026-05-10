@@ -42,26 +42,25 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
   {
     // create enough columns and add them to our list
     //
-    for (auto i = 0; i < cols; i++)
+    for (size_t i = 0; i < cols; i++)
       m_columns.push_back(std::make_shared<ui_column>(m_visible));
 
     // determine where all the splits are and grab each object
     //
     if (cols != 1)
     {
-      auto cursor = 0;
-      auto split_index = 0;
-      auto next_split = 0;
+      size_t cursor = 0;
+      size_t next_split = 0;
 
-      for (auto i = 0; i < m_children.size(); i++)
+      for (size_t i = 0; i < m_children.size(); i++)
       {
         // if we hit the split or we used up all our splits
         //
         bool last_col = i == (m_children.size() - 1);
 
-        if (i == m_splits[next_split] || last_col)
+        if (i == static_cast<size_t>(m_splits[next_split]) || last_col)
         {
-          auto extra = 0;
+          size_t extra = 0;
 
           if (last_col)
           {
@@ -71,7 +70,7 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
 
           // relocate all children from where we began to where we hit the split
           //
-          for (auto j = cursor; j < i + extra; j++)
+          for (size_t j = cursor; j < i + extra; j++)
           {
             m_columns[next_split]->push(m_children[j]);
             cursor += 1;
@@ -79,10 +78,8 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
 
           // increment to next split if possible
           //
-          if (next_split < (m_splits.size() - 1))
+          if (next_split + 1 < m_splits.size())
             next_split += 1;
-
-          split_index += 1;
         }
 
         // set all the childrens width to the desired width

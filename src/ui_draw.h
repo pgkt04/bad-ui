@@ -9,6 +9,8 @@
 class ui_draw
 {
 public:
+  virtual ~ui_draw() = default;
+
   virtual void draw_line(float x0, float y0, float x1, float y1, ui_color color) = 0;
   virtual void draw_rectangle(ui_dimension dimension, ui_color color) = 0;
   virtual void draw_text(const char* text, float x, float y, ui_color color) = 0;

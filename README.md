@@ -11,3 +11,13 @@ This works with all renders including:
 
 ![ui](resources/ui.png)
 
+## macOS
+
+Build and run the native Cocoa/CoreGraphics sample host:
+
+```sh
+make macos
+./build/bad-ui-macos
+```
+
+The Visual Studio/D3D9 sample remains available under `src/kitto-ui.sln` for Windows.

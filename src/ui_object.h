@@ -25,6 +25,7 @@ public:
   /// Constructors / deconstructors
 
   ui_object();
+  virtual ~ui_object() = default;
 
   /// Getter / Setters
 

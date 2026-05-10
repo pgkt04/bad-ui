@@ -24,6 +24,8 @@ public:
     m_h = h;
   }
 
+  ui_dimension(const ui_dimension&) = default;
+
   float& operator[](int i)
   {
     return ((float*)this)[i];
@@ -119,6 +121,8 @@ public:
     m_b = b;
     m_a = a;
   }
+
+  ui_color(const ui_color&) = default;
 
   float& operator[](int i)
   {

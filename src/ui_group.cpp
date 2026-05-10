@@ -132,6 +132,5 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
 
 void ui_group::render(std::shared_ptr<ui_draw> draw_ptr)
 {
-  for (auto child : get_children())
-    child->render(draw_ptr);
+  render_children(draw_ptr);
 }

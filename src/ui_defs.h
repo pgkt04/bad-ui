@@ -220,6 +220,7 @@ struct ui_mouse
   bool buttons[ui_button_max];
   float pos_x;
   float pos_y;
+  float wheel_delta;
 };
 
 struct ui_keys

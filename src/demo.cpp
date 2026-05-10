@@ -30,6 +30,26 @@ std::shared_ptr<ui_form> demo_create_ui()
     {
       tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
       tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
     }
     form->push(tab);
 

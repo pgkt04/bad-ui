@@ -70,15 +70,5 @@ void ui_column::render(std::shared_ptr<ui_draw> draw_ptr)
     draw_ptr->draw_rectangle(inner, get_style()->m_background);
   }
 
-  for (auto child : get_children())
-  {
-    if (!child->get_render_last())
-      child->render(draw_ptr);
-  }
-
-  for (auto child : get_children())
-  {
-    if (child->get_render_last())
-      child->render(draw_ptr);
-  }
+  render_children(draw_ptr);
 }

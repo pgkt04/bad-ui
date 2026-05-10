@@ -104,17 +104,5 @@ void ui_tab::render(std::shared_ptr<ui_draw> draw_ptr)
 
   /// Render all children
   if (get_selected())
-  {
-    for (auto child : get_children())
-    {
-      if (!child->get_render_last())
-        child->render(draw_ptr);
-    }
-
-    for (auto child : get_children())
-    {
-      if (child->get_render_last())
-        child->render(draw_ptr);
-    }
-  }
+    render_children(draw_ptr);
 }

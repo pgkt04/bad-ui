@@ -78,6 +78,7 @@ static void send_input()
   {
     g_input.handled = false;
     g_form->input(g_input);
+    g_input.mouse.wheel_delta = 0.f;
   }
 }
 
@@ -180,6 +181,15 @@ static void send_input()
 {
   g_input.mouse.buttons[ui_button_middle] = false;
   [self updateMouse:event];
+}
+
+- (void)scrollWheel:(NSEvent*)event
+{
+  NSPoint point = [self convertPoint:event.locationInWindow fromView:nil];
+  g_input.mouse.pos_x = point.x;
+  g_input.mouse.pos_y = point.y;
+  g_input.mouse.wheel_delta = static_cast<float>(event.scrollingDeltaY);
+  send_input();
 }
 
 - (void)keyDown:(NSEvent*)event

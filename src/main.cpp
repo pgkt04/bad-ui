@@ -96,6 +96,7 @@ public:
 std::shared_ptr<ui_form> get_ui()
 {
   static bool selected = false;
+  static float slider_value = 0.5f;
 
   auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Title", 0, false);
   {
@@ -103,6 +104,7 @@ std::shared_ptr<ui_form> get_ui()
     {
       tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
       tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
+      tab->push(std::make_shared<ui_slider>("Slider", &slider_value));
     }
     form->push(tab);
 

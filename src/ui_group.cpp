@@ -25,7 +25,7 @@ void ui_group::push(std::shared_ptr<ui_object> object)
 void ui_group::input(ui_input& input)
 {
   set_input(input);
-  input_children(input);
+  input_children(input, false);
 }
 
 bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
@@ -97,21 +97,26 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
     }
 
     for (auto col : m_columns)
+    {
+      col->set_scroll_enabled(get_scroll_enabled());
       add_child(col);
+    }
 
     m_init = true;
   }
 
-  // manually handle sizing since our handle_relocations doesn't expect this kind of behaviour
-  //
+  // Invisible groups are layout wrappers only: they split space, but do not
+  // add frame padding of their own. Visible groups let their columns draw the
+  // frame, so the columns should fill the whole allocated group area.
+  auto inset = m_visible ? style_ptr->m_padding : 0.f;
   int i = 0;
   for (auto child : get_children())
   {
     auto dim = child->get_dimensions();
-    dim.m_x = this_dimension.m_x + col_width * i + style_ptr->m_padding;
+    dim.m_x = this_dimension.m_x + col_width * i + inset;
     dim.m_y = this_dimension.m_y;
-    dim.m_w = col_width - style_ptr->m_padding * 2.f;
-    dim.m_h = this_dimension.m_h - (style_ptr->m_padding + style_ptr->m_control_height);
+    dim.m_w = col_width - inset * 2.f;
+    dim.m_h = this_dimension.m_h;
 
     if (dim.m_w < 0.f)
       dim.m_w = 0.f;
@@ -121,6 +126,11 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
 
     child->set_dimensions(dim);
     child->set_parent_dimensions(this_dimension);
+
+    auto child_parent = std::dynamic_pointer_cast<ui_parent>(child);
+    if (child_parent)
+      child_parent->set_scroll_enabled(get_scroll_enabled());
+
     i += 1;
   }
 
@@ -132,5 +142,5 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
 
 void ui_group::render(std::shared_ptr<ui_draw> draw_ptr)
 {
-  render_children(draw_ptr);
+  render_children(draw_ptr, false);
 }

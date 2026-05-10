@@ -17,6 +17,7 @@ class ui_form : public ui_parent
   /// mouse caching for drag handling
   ui_mouse m_mouse;
   ui_mouse m_last_mouse;
+  bool m_resizing;
 
   int m_last_tab;
 public:

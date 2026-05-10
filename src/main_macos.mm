@@ -23,6 +23,19 @@ static NSColor* ns_color(ui_color color)
                                   alpha:color_channel(color.m_a)];
 }
 
+static NSCursor* hidden_cursor()
+{
+  static NSCursor* cursor = nil;
+
+  if (!cursor)
+  {
+    NSImage* image = [[NSImage alloc] initWithSize:NSMakeSize(1.0, 1.0)];
+    cursor = [[NSCursor alloc] initWithImage:image hotSpot:NSMakePoint(0.0, 0.0)];
+  }
+
+  return cursor;
+}
+
 class ui_macos_wrapper : public ui_draw
 {
   CGContextRef m_context;
@@ -101,6 +114,12 @@ static void send_input()
 {
   [self.window makeFirstResponder:self];
   [self.window setAcceptsMouseMovedEvents:YES];
+}
+
+- (void)resetCursorRects
+{
+  if (g_style && g_style->m_hide_os_cursor)
+    [self addCursorRect:self.bounds cursor:hidden_cursor()];
 }
 
 - (void)redraw
@@ -237,7 +256,7 @@ int main(int argc, char** argv)
                                                    styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable
                                                      backing:NSBackingStoreBuffered
                                                        defer:NO];
-    [window setTitle:@"bad-ui"];
+    [window setTitle:@"Bad UI Demo"];
     [window center];
 
     BadUIView* view = [[BadUIView alloc] initWithFrame:frame];

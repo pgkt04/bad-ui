@@ -154,7 +154,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     NULL,
     NULL,
     NULL,
-    "Kitto UI",
+    "Bad UI Demo",
     NULL
   };
 
@@ -162,7 +162,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
   const auto hwnd = ::CreateWindow(
     wc.lpszClassName,
-    "Kitto UI",
+    "Bad UI Demo",
     WS_OVERLAPPEDWINDOW,
     0,
     0,

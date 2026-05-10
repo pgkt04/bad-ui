@@ -16,7 +16,7 @@ void ui_column::push(std::shared_ptr<ui_object> object)
 void ui_column::input(ui_input& input)
 {
   set_input(input);
-  input_children(input);
+  input_children(input, get_scroll_enabled());
 }
 
 bool ui_column::think(std::shared_ptr<ui_style> style_ptr)
@@ -24,28 +24,32 @@ bool ui_column::think(std::shared_ptr<ui_style> style_ptr)
   set_style(style_ptr);
 
   auto outer = get_dimensions();
+  auto layout = outer;
 
   if (m_visible)
   {
-    auto inner = outer;
-    inner.m_x += 1.f;
-    inner.m_y += 1.f;
-    inner.m_w -= 2.f;
-    inner.m_h -= 2.f;
+    layout.m_x += 1.f;
+    layout.m_y += 1.f;
+    layout.m_w -= 2.f;
+    layout.m_h -= 2.f;
 
-    if (inner.m_w < 0.f)
-      inner.m_w = 0.f;
+    if (layout.m_w < 0.f)
+      layout.m_w = 0.f;
 
-    if (inner.m_h < 0.f)
-      inner.m_h = 0.f;
-
-    set_dimensions(inner);
+    if (layout.m_h < 0.f)
+      layout.m_h = 0.f;
+  }
+  else
+  {
+    // Hidden columns come from hidden groups and should not create their own
+    // top inset; they are just layout rails for the visible child groups.
+    layout.m_y -= style_ptr->m_padding;
+    layout.m_h += style_ptr->m_padding;
   }
 
+  set_dimensions(layout);
   handle_relocations(style_ptr);
-
-  if (m_visible)
-    set_dimensions(outer);
+  set_dimensions(outer);
 
   for (auto child : get_children())
     child->think(style_ptr);
@@ -70,5 +74,5 @@ void ui_column::render(std::shared_ptr<ui_draw> draw_ptr)
     draw_ptr->draw_rectangle(inner, get_style()->m_background);
   }
 
-  render_children(draw_ptr);
+  render_children(draw_ptr, get_scroll_enabled());
 }

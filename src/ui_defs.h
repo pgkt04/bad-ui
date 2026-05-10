@@ -1,4 +1,4 @@
-/// Helper definitions for custom classes for kitto ui
+/// Helper definitions for custom classes for bad-ui
 ///
 
 #pragma once

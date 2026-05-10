@@ -19,6 +19,26 @@ static float rounded_rect_radius(ui_dimension dimension, float rounding)
   return max_radius * clamp_rounding(rounding);
 }
 
+static float max_float(float a, float b)
+{
+  return a > b ? a : b;
+}
+
+static ui_dimension get_resize_grip_area(ui_dimension dimension, std::shared_ptr<ui_style> style)
+{
+  auto size = style->m_control_height;
+
+  if (size < 12.f)
+    size = 12.f;
+
+  return ui_dimension(
+    dimension.m_x + dimension.m_w - size,
+    dimension.m_y + dimension.m_h - size,
+    size,
+    size
+  );
+}
+
 static void draw_rounded_rect_with_radius(std::shared_ptr<ui_draw> draw_ptr, ui_dimension dimension, ui_color color, float radius, bool top_only)
 {
   if (radius <= 0.f)
@@ -77,6 +97,13 @@ static void draw_cursor(std::shared_ptr<ui_draw> draw_ptr, float x, float y, ui_
   draw_ptr->draw_line(x + 6.f, y + 11.f, x + 11.f, y + 11.f, color);
 }
 
+static void draw_resize_grip(std::shared_ptr<ui_draw> draw_ptr, ui_dimension grip, ui_color foreground)
+{
+  draw_ptr->draw_line(grip.m_x + grip.m_w - 3.f, grip.m_y + 3.f, grip.m_x + 3.f, grip.m_y + grip.m_h - 3.f, foreground);
+  draw_ptr->draw_line(grip.m_x + grip.m_w - 3.f, grip.m_y + 7.f, grip.m_x + 7.f, grip.m_y + grip.m_h - 3.f, foreground);
+  draw_ptr->draw_line(grip.m_x + grip.m_w - 3.f, grip.m_y + 11.f, grip.m_x + 11.f, grip.m_y + grip.m_h - 3.f, foreground);
+}
+
 // parent class for all controls
 // tab_settings - 0 (none), 1 (top), 2 (bottom), 3 (left), 4 (right)
 //
@@ -88,6 +115,7 @@ ui_form::ui_form(ui_dimension dimensions, const char* title, int tab_setting, bo
   m_depth_enable = depth_enable;
   m_mouse = {};
   m_last_mouse = {};
+  m_resizing = false;
   m_last_tab = -1;
 }
 
@@ -109,8 +137,19 @@ bool ui_form::think(std::shared_ptr<ui_style> style_ptr)
   m_mouse.pos_x = get_input().mouse.pos_x;
   m_mouse.pos_y = get_input().mouse.pos_y;
 
+  if (m_resizing)
+  {
+    auto dimensions = get_dimensions();
+    auto delta_x = (m_mouse.pos_x - m_last_mouse.pos_x);
+    auto delta_y = (m_mouse.pos_y - m_last_mouse.pos_y);
+    dimensions.m_w = max_float(dimensions.m_w + delta_x, 220.f);
+    dimensions.m_h = max_float(dimensions.m_h + delta_y, 160.f);
+
+    if (std::abs(delta_x) > 1.f || std::abs(delta_y) > 1.f)
+      set_dimensions(dimensions);
+  }
   // apply dragging
-  if (get_selected())
+  else if (get_selected())
   {
     auto dimensions = get_dimensions();
     auto delta_x = (m_mouse.pos_x - m_last_mouse.pos_x);
@@ -144,9 +183,25 @@ void ui_form::input(ui_input& input)
   {
     auto draggable_area = get_dimensions();
     draggable_area.m_h = style->m_window_title_height;
+    auto grip_area = get_resize_grip_area(get_dimensions(), style);
 
     if (!input.mouse.buttons[ui_button_left])
+    {
       set_selected(false);
+      m_resizing = false;
+    }
+    else if (style->m_window_resize_enabled && m_resizing)
+    {
+      input.handled = true;
+      return;
+    }
+    else if (style->m_window_resize_enabled && UI_IN_AREA(input.mouse, grip_area))
+    {
+      m_resizing = true;
+      set_selected(false);
+      input.handled = true;
+      return;
+    }
 
     else if (UI_IN_AREA(input.mouse, draggable_area))
       set_selected(true);
@@ -196,6 +251,9 @@ void ui_form::render(std::shared_ptr<ui_draw> draw_ptr)
     if (child->get_render_last())
       child->render(draw_ptr);
   }
+
+  if (style->m_window_resize_enabled)
+    draw_resize_grip(draw_ptr, get_resize_grip_area(dimensions, style), style->m_accent);
 
   // render cursor
   draw_cursor(draw_ptr, m_mouse.pos_x, m_mouse.pos_y, style->m_accent);

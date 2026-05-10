@@ -20,4 +20,4 @@ make macos
 ./build/bad-ui-macos
 ```
 
-The Visual Studio/D3D9 sample remains available under `src/kitto-ui.sln` for Windows.
+The Visual Studio/D3D9 sample remains available under `src/bad-ui.sln` for Windows.

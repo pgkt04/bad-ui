@@ -11,6 +11,8 @@ std::shared_ptr<ui_style> demo_create_style()
   style->m_padding = 5.f;
   style->m_window_rounding_enabled = true;
   style->m_window_rounding = 0.08f;
+  style->m_window_resize_enabled = true;
+  style->m_hide_os_cursor = true;
   return style;
 }
 
@@ -29,7 +31,7 @@ std::shared_ptr<ui_form> demo_create_ui()
   static int quality = 2;
   static ui_color demo_color = ui_color(128, 64, 255, 255);
 
-  auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Kitto UI Demo", 0, false);
+  auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Bad UI Demo", 0, false);
   {
     auto controls_tab = std::make_shared<ui_tab>("Controls");
     {
@@ -59,6 +61,7 @@ std::shared_ptr<ui_form> demo_create_ui()
         controls_group->push(color_group);
 
         auto scroll_group = std::make_shared<ui_group>(true);
+        scroll_group->set_scroll_enabled(true);
         {
           scroll_group->push(std::make_shared<ui_text>("Scrollable demo"));
           scroll_group->push(std::make_shared<ui_checkbox>("List item 01", &scroll_items[0]));

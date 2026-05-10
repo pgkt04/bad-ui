@@ -118,12 +118,14 @@ std::shared_ptr<ui_form> get_ui()
         group1->push(std::make_shared<ui_checkbox>("Checkbox 5", &selected));
         group1->push(std::make_shared<ui_slider>("Tab 2 Slider", &tab2_slider_value));
         group1->push(std::make_shared<ui_dropdown>("Tab 2 Mode", dropdown_items, 3, &tab2_dropdown_value));
+        group1->push(std::make_shared<ui_button>("Toggle Checks", [] { selected = !selected; }));
 
         auto tab_group1 = std::make_shared<ui_tab>("Tab 1");
         {
           tab_group1->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
           tab_group1->push(std::make_shared<ui_slider>("Sub Slider", &subtab_slider_value));
           tab_group1->push(std::make_shared<ui_dropdown>("Sub Mode", dropdown_items, 3, &subtab_dropdown_value));
+          tab_group1->push(std::make_shared<ui_button>("Sub Button", [] { selected = !selected; }));
           tab_group1->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
         }
         group1->push(tab_group1);

@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="external_input.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ui_button.cpp" />
     <ClCompile Include="ui_checkbox.cpp" />
     <ClCompile Include="ui_columns.cpp" />
     <ClCompile Include="ui_dropdown.cpp" />
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external_input.h" />
+    <ClInclude Include="ui_button.h" />
     <ClInclude Include="ui_checkbox.h" />
     <ClInclude Include="ui_columns.h" />
     <ClInclude Include="ui_control.h" />

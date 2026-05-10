@@ -55,6 +55,9 @@
     <Filter Include="Resource Files\ui\objects\controls\dropdown">
       <UniqueIdentifier>{5a1edb3e-36c5-4ac5-bf09-ddcff78f6a4f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\ui\objects\controls\button">
+      <UniqueIdentifier>{862498ab-f754-48aa-b0ca-b26a1e95085f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -92,6 +95,9 @@
     </ClCompile>
     <ClCompile Include="ui_dropdown.cpp">
       <Filter>Resource Files\ui\objects\controls\dropdown</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_button.cpp">
+      <Filter>Resource Files\ui\objects\controls\button</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -142,6 +148,9 @@
     </ClInclude>
     <ClInclude Include="ui_dropdown.h">
       <Filter>Resource Files\ui\objects\controls\dropdown</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_button.h">
+      <Filter>Resource Files\ui\objects\controls\button</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

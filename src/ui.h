@@ -17,5 +17,6 @@
 #include "ui_tab.h"
 #include "ui_group.h"
 #include "ui_checkbox.h"
+#include "ui_button.h"
 #include "ui_slider.h"
 #include "ui_dropdown.h"

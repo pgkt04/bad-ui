@@ -419,5 +419,5 @@ void ui_parent::render_scrollbar(std::shared_ptr<ui_draw> draw_ptr)
   auto thumb = get_scrollbar_thumb(track, viewport.m_h, m_content_height, m_scroll_offset, style->m_control_height);
 
   draw_ptr->draw_rectangle(track, style->m_foreground);
-  draw_ptr->draw_rectangle(thumb, style->m_text);
+  draw_ptr->draw_rectangle(thumb, style->m_accent);
 }

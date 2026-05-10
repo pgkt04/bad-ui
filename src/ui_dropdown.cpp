@@ -48,7 +48,6 @@ ui_dropdown::ui_dropdown(const char* name, const char** items, int item_count, i
   m_selected = selected;
   m_open = false;
   m_pressed = false;
-  set_render_last(true);
 }
 
 bool ui_dropdown::think(std::shared_ptr<ui_style> style_ptr)
@@ -57,6 +56,8 @@ bool ui_dropdown::think(std::shared_ptr<ui_style> style_ptr)
 
   if (m_selected)
     *m_selected = clamp_dropdown_index(*m_selected, m_item_count);
+
+  set_render_last(m_open);
 
   return true;
 }
@@ -90,6 +91,7 @@ void ui_dropdown::input(ui_input& input)
   if (in_button)
   {
     m_open = !m_open;
+    set_render_last(m_open);
     input.handled = true;
     return;
   }
@@ -104,12 +106,14 @@ void ui_dropdown::input(ui_input& input)
       {
         *m_selected = i;
         m_open = false;
+        set_render_last(false);
         input.handled = true;
         return;
       }
     }
 
     m_open = false;
+    set_render_last(false);
     input.handled = true;
   }
 }

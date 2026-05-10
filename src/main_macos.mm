@@ -130,7 +130,7 @@ static void send_input()
 - (void)drawRect:(NSRect)dirtyRect
 {
   CGContextRef context = [[NSGraphicsContext currentContext] CGContext];
-  CGContextSetFillColorWithColor(context, [NSColor colorWithCalibratedRed:0.45 green:0.55 blue:0.60 alpha:1.0].CGColor);
+  CGContextSetFillColorWithColor(context, [NSColor colorWithCalibratedRed:0.26 green:0.27 blue:0.32 alpha:1.0].CGColor);
   CGContextFillRect(context, NSRectToCGRect(self.bounds));
 
   auto draw = std::make_shared<ui_macos_wrapper>(context);

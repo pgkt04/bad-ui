@@ -9,6 +9,7 @@ public:
   ui_color m_foreground;
   ui_color m_accent;
   ui_color m_text;
+  ui_color m_border;
   float m_window_title_height = 15.f;
   bool m_window_rounding_enabled = false;
   float m_window_rounding = 0.f;

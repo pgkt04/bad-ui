@@ -123,7 +123,7 @@ void ui_column::render(std::shared_ptr<ui_draw> draw_ptr)
     auto radius = style->m_group_rounding_enabled ?
       rounded_rect_radius(get_dimensions(), style->m_group_rounding) : 0.f;
 
-    draw_rounded_rect(draw_ptr, get_dimensions(), style->m_text, radius);
+    draw_rounded_rect(draw_ptr, get_dimensions(), style->m_border, radius);
     auto inner = get_dimensions();
     inner.m_x += 1;
     inner.m_y += 1;

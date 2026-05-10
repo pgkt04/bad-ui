@@ -9,7 +9,7 @@ This works with all renders including:
 
   
 
-![ui](resources/ui.png)
+![bad-ui demo](resources/demo.png)
 
 ## macOS
 

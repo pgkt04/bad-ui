@@ -3,10 +3,11 @@
 std::shared_ptr<ui_style> demo_create_style()
 {
   auto style = std::make_shared<ui_style>();
-  style->m_accent = ui_color(255, 255, 255, 255);
-  style->m_background = ui_color(5, 5, 5, 255);
-  style->m_foreground = ui_color(0x2d, 0x30, 0x35, 255);
-  style->m_text = ui_color(255, 255, 255, 255);
+  style->m_accent = ui_color(255, 132, 92, 255);
+  style->m_background = ui_color(14, 15, 20, 255);
+  style->m_foreground = ui_color(45, 51, 61, 255);
+  style->m_text = ui_color(242, 237, 229, 255);
+  style->m_border = ui_color(72, 81, 96, 255);
   style->m_control_height = 15.f;
   style->m_padding = 5.f;
   style->m_window_rounding_enabled = true;
@@ -31,7 +32,7 @@ std::shared_ptr<ui_form> demo_create_ui()
   static const char* quality_items[] = { "Low", "Medium", "High" };
   static int mode = 0;
   static int quality = 2;
-  static ui_color demo_color = ui_color(128, 64, 255, 255);
+  static ui_color demo_color = ui_color(255, 132, 92, 255);
 
   auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Bad UI Demo", 0, false);
   {
@@ -57,7 +58,7 @@ std::shared_ptr<ui_form> demo_create_ui()
         {
           color_group->push(std::make_shared<ui_text>("Color and actions"));
           color_group->push(std::make_shared<ui_color_picker>("Accent Color", &demo_color));
-          color_group->push(std::make_shared<ui_button>("Reset Color", [] { demo_color = ui_color(128, 64, 255, 255); }));
+          color_group->push(std::make_shared<ui_button>("Reset Color", [] { demo_color = ui_color(255, 132, 92, 255); }));
           color_group->push(std::make_shared<ui_checkbox>("Preview enabled", &notifications));
         }
         controls_group->push(color_group);

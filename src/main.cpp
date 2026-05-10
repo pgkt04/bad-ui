@@ -212,7 +212,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     g_pd3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
     g_pd3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
     g_pd3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
-    const auto clear_color = ui_color(0.45f, 0.55f, 0.60f, 1.00f);
+    const auto clear_color = ui_color(0.26f, 0.27f, 0.32f, 1.00f);
 
     const auto clear_col_dx = D3DCOLOR_RGBA(
       static_cast<int>(clear_color.m_r * 255.0f),

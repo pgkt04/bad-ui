@@ -1,6 +1,15 @@
 #include "ui_color_picker.h"
 
+#include <cmath>
 #include <cstdio>
+
+enum color_picker_drag_mode
+{
+  drag_none = -1,
+  drag_square,
+  drag_hue,
+  drag_alpha
+};
 
 static float clamp_channel(float value)
 {
@@ -29,58 +38,116 @@ static int channel_int(float value)
   return static_cast<int>(clamp_channel(value));
 }
 
-static float get_channel(ui_color color, int channel)
+static ui_color hsv_to_rgb(float hue, float saturation, float value, float alpha)
 {
-  switch (channel)
+  hue = clamp_normalized(hue);
+  saturation = clamp_normalized(saturation);
+  value = clamp_normalized(value);
+
+  auto h = hue * 6.f;
+  auto i = static_cast<int>(h);
+  auto f = h - static_cast<float>(i);
+  auto p = value * (1.f - saturation);
+  auto q = value * (1.f - f * saturation);
+  auto t = value * (1.f - (1.f - f) * saturation);
+  auto r = value;
+  auto g = t;
+  auto b = p;
+
+  switch (i % 6)
   {
   case 0:
-    return color.m_r;
+    r = value;
+    g = t;
+    b = p;
+    break;
   case 1:
-    return color.m_g;
+    r = q;
+    g = value;
+    b = p;
+    break;
   case 2:
-    return color.m_b;
+    r = p;
+    g = value;
+    b = t;
+    break;
+  case 3:
+    r = p;
+    g = q;
+    b = value;
+    break;
+  case 4:
+    r = t;
+    g = p;
+    b = value;
+    break;
   default:
-    return color.m_a;
+    r = value;
+    g = p;
+    b = q;
+    break;
   }
+
+  return ui_color(r * 255.f, g * 255.f, b * 255.f, alpha);
 }
 
-static void set_channel(ui_color* color, int channel, float value)
+static ui_color lerp_color(ui_color from, ui_color to, float amount)
 {
-  if (!color)
+  amount = clamp_normalized(amount);
+
+  return ui_color(
+    from.m_r + (to.m_r - from.m_r) * amount,
+    from.m_g + (to.m_g - from.m_g) * amount,
+    from.m_b + (to.m_b - from.m_b) * amount,
+    from.m_a + (to.m_a - from.m_a) * amount
+  );
+}
+
+static ui_color sv_square_color(ui_color hue_color, float saturation, float value)
+{
+  auto saturated = lerp_color(ui_color(255, 255, 255, 255), hue_color, saturation);
+
+  return lerp_color(ui_color(0, 0, 0, 255), saturated, value);
+}
+
+static void rgb_to_hsv(ui_color color, float fallback_hue, float& hue, float& saturation, float& value)
+{
+  auto r = clamp_channel(color.m_r) / 255.f;
+  auto g = clamp_channel(color.m_g) / 255.f;
+  auto b = clamp_channel(color.m_b) / 255.f;
+  auto max = r;
+  auto min = r;
+
+  if (g > max)
+    max = g;
+  if (b > max)
+    max = b;
+  if (g < min)
+    min = g;
+  if (b < min)
+    min = b;
+
+  auto delta = max - min;
+  value = max;
+  saturation = max <= 0.f ? 0.f : delta / max;
+
+  if (delta <= 0.f)
+  {
+    hue = fallback_hue;
     return;
-
-  value = clamp_channel(value);
-
-  switch (channel)
-  {
-  case 0:
-    color->m_r = value;
-    break;
-  case 1:
-    color->m_g = value;
-    break;
-  case 2:
-    color->m_b = value;
-    break;
-  default:
-    color->m_a = value;
-    break;
   }
-}
 
-static ui_color channel_color(int channel)
-{
-  switch (channel)
-  {
-  case 0:
-    return ui_color(255, 0, 0, 255);
-  case 1:
-    return ui_color(0, 255, 0, 255);
-  case 2:
-    return ui_color(0, 0, 255, 255);
-  default:
-    return ui_color(255, 255, 255, 255);
-  }
+  if (max == r)
+    hue = (g - b) / delta;
+  else if (max == g)
+    hue = 2.f + (b - r) / delta;
+  else
+    hue = 4.f + (r - g) / delta;
+
+  hue /= 6.f;
+
+  if (hue < 0.f)
+    hue += 1.f;
 }
 
 static ui_dimension get_picker_button_area(ui_dimension dimension, std::shared_ptr<ui_style> style)
@@ -99,39 +166,116 @@ static ui_dimension get_picker_button_area(ui_dimension dimension, std::shared_p
   );
 }
 
-static ui_dimension get_picker_row_area(ui_dimension button_area, std::shared_ptr<ui_style> style, int row)
+static ui_dimension get_square_area(ui_dimension button_area, std::shared_ptr<ui_style> style)
 {
+  auto size = button_area.m_w;
+
+  if (size > 120.f)
+    size = 120.f;
+
+  if (size < 0.f)
+    size = 0.f;
+
   return ui_dimension(
     button_area.m_x,
-    button_area.m_y + style->m_control_height * static_cast<float>(row + 1),
-    button_area.m_w,
+    button_area.m_y + style->m_control_height + style->m_padding,
+    size,
+    size
+  );
+}
+
+static ui_dimension get_hue_area(ui_dimension square_area, std::shared_ptr<ui_style> style)
+{
+  return ui_dimension(
+    square_area.m_x,
+    square_area.m_y + square_area.m_h + style->m_padding,
+    square_area.m_w,
     style->m_control_height
   );
 }
 
-static ui_dimension get_picker_bar_area(ui_dimension row_area, std::shared_ptr<ui_style> style)
+static ui_dimension get_alpha_area(ui_dimension hue_area, std::shared_ptr<ui_style> style)
 {
-  auto label_width = 36.f;
-  auto width = row_area.m_w - label_width - style->m_padding;
-
-  if (width < 0.f)
-    width = 0.f;
-
   return ui_dimension(
-    row_area.m_x + label_width,
-    row_area.m_y + 2.f,
-    width,
-    row_area.m_h - 4.f
+    hue_area.m_x,
+    hue_area.m_y + hue_area.m_h + style->m_padding,
+    hue_area.m_w,
+    style->m_control_height
   );
 }
 
-static void update_channel_from_mouse(ui_color* color, int channel, ui_input& input, ui_dimension bar_area)
+static void update_color(ui_color* color, float hue, float saturation, float value)
 {
-  if (bar_area.m_w <= 0.f)
+  if (!color)
     return;
 
-  auto normalized = clamp_normalized((input.mouse.pos_x - bar_area.m_x) / bar_area.m_w);
-  set_channel(color, channel, normalized * 255.f);
+  auto alpha = clamp_channel(color->m_a);
+  *color = hsv_to_rgb(hue, saturation, value, alpha);
+}
+
+static void update_square_from_mouse(ui_color* color, float& saturation, float& value, float hue, ui_input& input, ui_dimension square_area)
+{
+  if (square_area.m_w <= 0.f || square_area.m_h <= 0.f)
+    return;
+
+  saturation = clamp_normalized((input.mouse.pos_x - square_area.m_x) / square_area.m_w);
+  value = 1.f - clamp_normalized((input.mouse.pos_y - square_area.m_y) / square_area.m_h);
+  update_color(color, hue, saturation, value);
+}
+
+static void update_hue_from_mouse(ui_color* color, float& hue, float saturation, float value, ui_input& input, ui_dimension hue_area)
+{
+  if (hue_area.m_w <= 0.f)
+    return;
+
+  hue = clamp_normalized((input.mouse.pos_x - hue_area.m_x) / hue_area.m_w);
+  update_color(color, hue, saturation, value);
+}
+
+static void update_alpha_from_mouse(ui_color* color, ui_input& input, ui_dimension alpha_area)
+{
+  if (!color || alpha_area.m_w <= 0.f)
+    return;
+
+  color->m_a = clamp_normalized((input.mouse.pos_x - alpha_area.m_x) / alpha_area.m_w) * 255.f;
+}
+
+static float gradient_position(float position, float size, float step)
+{
+  auto denominator = size - step;
+
+  if (denominator <= 0.f)
+    return 0.f;
+
+  return clamp_normalized(position / denominator);
+}
+
+static float gradient_cell_size(float position, float size, float step)
+{
+  auto remaining = size - position;
+
+  if (remaining <= 0.f)
+    return 0.f;
+
+  return remaining < step ? remaining : step;
+}
+
+static ui_dimension pixel_snap(ui_dimension dimension)
+{
+  auto x0 = std::floor(dimension.m_x);
+  auto y0 = std::floor(dimension.m_y);
+  auto x1 = std::ceil(dimension.m_x + dimension.m_w);
+  auto y1 = std::ceil(dimension.m_y + dimension.m_h);
+
+  return ui_dimension(x0, y0, x1 - x0, y1 - y0);
+}
+
+static void draw_rect_border(std::shared_ptr<ui_draw> draw_ptr, ui_dimension dimension, ui_color color)
+{
+  draw_ptr->draw_rectangle(ui_dimension(dimension.m_x - 1.f, dimension.m_y - 1.f, dimension.m_w + 2.f, 1.f), color);
+  draw_ptr->draw_rectangle(ui_dimension(dimension.m_x - 1.f, dimension.m_y + dimension.m_h, dimension.m_w + 2.f, 1.f), color);
+  draw_ptr->draw_rectangle(ui_dimension(dimension.m_x - 1.f, dimension.m_y, 1.f, dimension.m_h), color);
+  draw_ptr->draw_rectangle(ui_dimension(dimension.m_x + dimension.m_w, dimension.m_y, 1.f, dimension.m_h), color);
 }
 
 ui_color_picker::ui_color_picker(const char* name, ui_color* color)
@@ -140,7 +284,10 @@ ui_color_picker::ui_color_picker(const char* name, ui_color* color)
   m_color = color;
   m_open = false;
   m_pressed = false;
-  m_drag_channel = -1;
+  m_drag_mode = drag_none;
+  m_hue = 0.f;
+  m_saturation = 0.f;
+  m_value = 0.f;
   set_render_last(true);
 }
 
@@ -154,6 +301,9 @@ bool ui_color_picker::think(std::shared_ptr<ui_style> style_ptr)
     m_color->m_g = clamp_channel(m_color->m_g);
     m_color->m_b = clamp_channel(m_color->m_b);
     m_color->m_a = clamp_channel(m_color->m_a);
+
+    if (m_drag_mode == drag_none)
+      rgb_to_hsv(*m_color, m_hue, m_hue, m_saturation, m_value);
   }
 
   return true;
@@ -167,19 +317,34 @@ void ui_color_picker::input(ui_input& input)
     return;
 
   auto button_area = get_picker_button_area(get_dimensions(), style);
+  auto square_area = get_square_area(button_area, style);
+  auto hue_area = get_hue_area(square_area, style);
+  auto alpha_area = get_alpha_area(hue_area, style);
 
   if (!input.mouse.buttons[ui_button_left])
   {
     m_pressed = false;
-    m_drag_channel = -1;
+    m_drag_mode = drag_none;
     return;
   }
 
-  if (m_drag_channel >= 0)
+  if (m_drag_mode == drag_square)
   {
-    auto row_area = get_picker_row_area(button_area, style, m_drag_channel + 1);
-    auto bar_area = get_picker_bar_area(row_area, style);
-    update_channel_from_mouse(m_color, m_drag_channel, input, bar_area);
+    update_square_from_mouse(m_color, m_saturation, m_value, m_hue, input, square_area);
+    input.handled = true;
+    return;
+  }
+
+  if (m_drag_mode == drag_hue)
+  {
+    update_hue_from_mouse(m_color, m_hue, m_saturation, m_value, input, hue_area);
+    input.handled = true;
+    return;
+  }
+
+  if (m_drag_mode == drag_alpha)
+  {
+    update_alpha_from_mouse(m_color, input, alpha_area);
     input.handled = true;
     return;
   }
@@ -201,19 +366,31 @@ void ui_color_picker::input(ui_input& input)
   if (!m_open)
     return;
 
-  for (auto channel = 0; channel < 4; channel++)
+  if (UI_IN_AREA(input.mouse, square_area))
   {
-    auto row_area = get_picker_row_area(button_area, style, channel + 1);
-    auto bar_area = get_picker_bar_area(row_area, style);
+    m_drag_mode = drag_square;
+    m_pressed = true;
+    update_square_from_mouse(m_color, m_saturation, m_value, m_hue, input, square_area);
+    input.handled = true;
+    return;
+  }
 
-    if (UI_IN_AREA(input.mouse, bar_area))
-    {
-      m_drag_channel = channel;
-      m_pressed = true;
-      update_channel_from_mouse(m_color, channel, input, bar_area);
-      input.handled = true;
-      return;
-    }
+  if (UI_IN_AREA(input.mouse, hue_area))
+  {
+    m_drag_mode = drag_hue;
+    m_pressed = true;
+    update_hue_from_mouse(m_color, m_hue, m_saturation, m_value, input, hue_area);
+    input.handled = true;
+    return;
+  }
+
+  if (UI_IN_AREA(input.mouse, alpha_area))
+  {
+    m_drag_mode = drag_alpha;
+    m_pressed = true;
+    update_alpha_from_mouse(m_color, input, alpha_area);
+    input.handled = true;
+    return;
   }
 
   m_open = false;
@@ -243,33 +420,58 @@ void ui_color_picker::render(std::shared_ptr<ui_draw> draw_ptr)
   if (!m_open)
     return;
 
-  auto preview_area = get_picker_row_area(button_area, style, 0);
-  auto preview_swatch = preview_area;
-  preview_swatch.m_x += style->m_padding;
-  preview_swatch.m_y += 2.f;
-  preview_swatch.m_w -= style->m_padding * 2.f;
-  preview_swatch.m_h -= 4.f;
+  auto square_area = get_square_area(button_area, style);
+  auto hue_area = get_hue_area(square_area, style);
+  auto alpha_area = get_alpha_area(hue_area, style);
+  auto step = 1.f;
+  square_area = pixel_snap(square_area);
+  hue_area = pixel_snap(hue_area);
+  alpha_area = pixel_snap(alpha_area);
+  auto popup_area = ui_dimension(
+    square_area.m_x - 1.f,
+    square_area.m_y - 1.f,
+    square_area.m_w + 2.f,
+    alpha_area.m_y + alpha_area.m_h - square_area.m_y + 2.f
+  );
 
-  draw_ptr->draw_rectangle(preview_area, style->m_background);
-  draw_ptr->draw_rectangle(preview_swatch, *m_color);
+  draw_ptr->draw_rectangle(popup_area, style->m_background);
+  draw_ptr->draw_rectangle(square_area, ui_color(0, 0, 0, 255));
 
-  const char* labels[] = { "R", "G", "B", "A" };
-
-  for (auto channel = 0; channel < 4; channel++)
+  auto hue_color = hsv_to_rgb(m_hue, 1.f, 1.f, 255.f);
+  for (auto y = 0.f; y < square_area.m_h; y += step)
   {
-    auto row_area = get_picker_row_area(button_area, style, channel + 1);
-    auto bar_area = get_picker_bar_area(row_area, style);
-    auto value = clamp_channel(get_channel(*m_color, channel));
-    auto fill_area = bar_area;
-    char value_text[16];
-    std::snprintf(value_text, sizeof(value_text), "%s %d", labels[channel], channel_int(value));
-    fill_area.m_w *= value / 255.f;
-
-    draw_ptr->draw_rectangle(row_area, style->m_background);
-    draw_ptr->draw_text(value_text, row_area.m_x + style->m_padding, row_area.m_y, style->m_text);
-    draw_ptr->draw_rectangle(bar_area, style->m_foreground);
-
-    if (fill_area.m_w > 0.f)
-      draw_ptr->draw_rectangle(fill_area, channel_color(channel));
+    for (auto x = 0.f; x < square_area.m_w; x += step)
+    {
+      auto saturation = gradient_position(x + step * 0.5f, square_area.m_w, step);
+      auto value = 1.f - gradient_position(y + step * 0.5f, square_area.m_h, step);
+      auto cell_w = gradient_cell_size(x, square_area.m_w, step);
+      auto cell_h = gradient_cell_size(y, square_area.m_h, step);
+      draw_ptr->draw_rectangle(ui_dimension(square_area.m_x + x, square_area.m_y + y, cell_w, cell_h), sv_square_color(hue_color, saturation, value));
+    }
   }
+
+  draw_rect_border(draw_ptr, square_area, style->m_text);
+
+  auto marker_x = square_area.m_x + m_saturation * square_area.m_w;
+  auto marker_y = square_area.m_y + (1.f - m_value) * square_area.m_h;
+  draw_ptr->draw_line(marker_x - 4.f, marker_y, marker_x + 4.f, marker_y, style->m_text);
+  draw_ptr->draw_line(marker_x, marker_y - 4.f, marker_x, marker_y + 4.f, style->m_text);
+
+  for (auto x = 0.f; x < hue_area.m_w; x += step)
+  {
+    auto hue = gradient_position(x + step * 0.5f, hue_area.m_w, step);
+    auto cell_w = gradient_cell_size(x, hue_area.m_w, step);
+    draw_ptr->draw_rectangle(ui_dimension(hue_area.m_x + x, hue_area.m_y, cell_w, hue_area.m_h), hsv_to_rgb(hue, 1.f, 1.f, 255.f));
+  }
+
+  auto hue_x = hue_area.m_x + m_hue * hue_area.m_w;
+  draw_ptr->draw_line(hue_x, hue_area.m_y, hue_x, hue_area.m_y + hue_area.m_h, style->m_text);
+
+  draw_ptr->draw_rectangle(alpha_area, style->m_foreground);
+  auto alpha_fill = alpha_area;
+  alpha_fill.m_w *= clamp_channel(m_color->m_a) / 255.f;
+  draw_ptr->draw_rectangle(alpha_fill, *m_color);
+  auto alpha_x = alpha_area.m_x + (clamp_channel(m_color->m_a) / 255.f) * alpha_area.m_w;
+  draw_ptr->draw_line(alpha_x, alpha_area.m_y, alpha_x, alpha_area.m_y + alpha_area.m_h, style->m_text);
+  draw_ptr->draw_text("Alpha", alpha_area.m_x + style->m_padding, alpha_area.m_y, style->m_text);
 }

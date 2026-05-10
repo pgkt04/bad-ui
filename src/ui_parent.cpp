@@ -85,11 +85,18 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
 
   auto ignore_index = 0;
   auto tab_y = dynamic_y;
+  auto tabs_started = false;
 
   // Set children height and width
   //
   for (auto child : get_children())
   {
+    if (child->get_is_tab() && !tabs_started)
+    {
+      tab_y = dynamic_y;
+      tabs_started = true;
+    }
+
     child->set_dimensions(ui_dimension(
         child->get_is_tab() ? (this->get_is_tab() ? get_parent_dimensions().m_x : dimensions.m_x)
         + (dynamic_width * static_cast<float>(ignore_index)) : dynamic_x,

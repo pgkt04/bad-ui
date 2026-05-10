@@ -12,7 +12,7 @@ static ui_input g_input = {};
 
 static CGFloat color_channel(float value)
 {
-  return static_cast<CGFloat>(std::max(0.0f, std::min(value, value > 1.0f ? 255.0f : 1.0f)) / (value > 1.0f ? 255.0f : 1.0f));
+  return static_cast<CGFloat>(std::max(0.0f, std::min(value, 255.0f)) / 255.0f);
 }
 
 static NSColor* ns_color(ui_color color)

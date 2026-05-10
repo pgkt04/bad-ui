@@ -27,13 +27,21 @@ static float max_float(float a, float b)
 static ui_dimension get_resize_grip_area(ui_dimension dimension, std::shared_ptr<ui_style> style)
 {
   auto size = style->m_control_height;
+  auto inset = 0.f;
 
   if (size < 12.f)
     size = 12.f;
 
+  if (style->m_window_rounding_enabled)
+  {
+    // The resize grip is an overlay, but rounded windows clip the visual corner
+    // away. Move the grip inward so it stays inside the visible window shape.
+    inset = rounded_rect_radius(dimension, style->m_window_rounding) * 0.3f;
+  }
+
   return ui_dimension(
-    dimension.m_x + dimension.m_w - size,
-    dimension.m_y + dimension.m_h - size,
+    dimension.m_x + dimension.m_w - size - inset,
+    dimension.m_y + dimension.m_h - size - inset,
     size,
     size
   );
@@ -253,7 +261,12 @@ void ui_form::render(std::shared_ptr<ui_draw> draw_ptr)
   }
 
   if (style->m_window_resize_enabled)
-    draw_resize_grip(draw_ptr, get_resize_grip_area(dimensions, style), style->m_accent);
+  {
+    auto grip_area = get_resize_grip_area(dimensions, style);
+
+    if (m_resizing || (UI_IN_AREA(m_mouse, grip_area)))
+      draw_resize_grip(draw_ptr, grip_area, style->m_accent);
+  }
 
   // render cursor
   draw_cursor(draw_ptr, m_mouse.pos_x, m_mouse.pos_y, style->m_accent);

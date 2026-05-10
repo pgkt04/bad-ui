@@ -9,6 +9,8 @@ std::shared_ptr<ui_style> demo_create_style()
   style->m_text = ui_color(255, 255, 255, 255);
   style->m_control_height = 15.f;
   style->m_padding = 5.f;
+  style->m_window_rounding_enabled = true;
+  style->m_window_rounding = 0.08f;
   return style;
 }
 

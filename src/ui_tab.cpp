@@ -1,5 +1,38 @@
 #include "ui_tab.h"
 
+static float clamp_tab_channel(float value)
+{
+  if (value < 0.f)
+    return 0.f;
+
+  if (value > 255.f)
+    return 255.f;
+
+  return value;
+}
+
+static ui_color selected_tab_color(ui_color color)
+{
+  return ui_color(
+    clamp_tab_channel(color.m_r + 35.f),
+    clamp_tab_channel(color.m_g + 35.f),
+    clamp_tab_channel(color.m_b + 35.f),
+    color.m_a
+  );
+}
+
+static float rounded_tab_text_offset(ui_dimension dimensions, ui_dimension parent_dimensions, std::shared_ptr<ui_style> style)
+{
+  if (!style || !style->m_window_rounding_enabled)
+    return 0.f;
+
+  if (dimensions.m_x > parent_dimensions.m_x + 0.5f || dimensions.m_y > parent_dimensions.m_y + style->m_window_title_height + 0.5f)
+    return 0.f;
+
+  auto max_radius = parent_dimensions.m_w < parent_dimensions.m_h ? parent_dimensions.m_w * 0.5f : parent_dimensions.m_h * 0.5f;
+  return max_radius * style->m_window_rounding * 0.5f;
+}
+
 ui_tab::ui_tab(const char* name)
 {
   set_dynamic(true);
@@ -62,8 +95,12 @@ void ui_tab::render(std::shared_ptr<ui_draw> draw_ptr)
   /// background
   /// draw_ptr->draw_rectangle(ui_dimension(dimensions.m_x, dimensions.m_y, dimensions.m_w, dimensions.m_h), style->m_text);
 
-  draw_ptr->draw_rectangle(ui_dimension(dimensions.m_x, dimensions.m_y, dimensions.m_w, style->m_control_height), style->m_foreground);
-  draw_ptr->draw_text(m_name, dimensions.m_x, dimensions.m_y, style->m_text);
+  auto tab_area = ui_dimension(dimensions.m_x, dimensions.m_y, dimensions.m_w, style->m_control_height);
+  auto color = get_selected() ? selected_tab_color(style->m_foreground) : style->m_foreground;
+
+  draw_ptr->draw_rectangle(tab_area, color);
+  auto text_x = dimensions.m_x + style->m_padding + rounded_tab_text_offset(dimensions, get_parent_dimensions(), style);
+  draw_ptr->draw_text(m_name, text_x, dimensions.m_y, style->m_text);
 
   /// Render all children
   if (get_selected())

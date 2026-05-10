@@ -1,6 +1,61 @@
 #include "ui_form.h"
 #include <cmath>
 
+static float clamp_rounding(float value)
+{
+  if (value < 0.f)
+    return 0.f;
+
+  if (value > 1.f)
+    return 1.f;
+
+  return value;
+}
+
+static float rounded_rect_radius(ui_dimension dimension, float rounding)
+{
+  auto max_radius = dimension.m_w < dimension.m_h ? dimension.m_w * 0.5f : dimension.m_h * 0.5f;
+
+  return max_radius * clamp_rounding(rounding);
+}
+
+static void draw_rounded_rect_with_radius(std::shared_ptr<ui_draw> draw_ptr, ui_dimension dimension, ui_color color, float radius, bool top_only)
+{
+  if (radius <= 0.f)
+  {
+    draw_ptr->draw_rectangle(dimension, color);
+    return;
+  }
+
+  auto y0 = static_cast<int>(std::floor(dimension.m_y));
+  auto y1 = static_cast<int>(std::ceil(dimension.m_y + dimension.m_h));
+
+  for (auto y = y0; y < y1; y++)
+  {
+    auto fy = static_cast<float>(y) + 0.5f;
+    auto inset = 0.f;
+    auto top_distance = fy - dimension.m_y;
+    auto bottom_distance = dimension.m_y + dimension.m_h - fy;
+
+    if (top_distance < radius)
+    {
+      auto dy = radius - top_distance;
+      inset = radius - std::sqrt(radius * radius - dy * dy);
+    }
+    else if (!top_only && bottom_distance < radius)
+    {
+      auto dy = radius - bottom_distance;
+      inset = radius - std::sqrt(radius * radius - dy * dy);
+    }
+
+    auto x = dimension.m_x + inset;
+    auto w = dimension.m_w - inset * 2.f;
+
+    if (w > 0.f)
+      draw_ptr->draw_rectangle(ui_dimension(x, static_cast<float>(y), w, 1.f), color);
+  }
+}
+
 // parent class for all controls
 // tab_settings - 0 (none), 1 (top), 2 (bottom), 3 (left), 4 (right)
 //
@@ -81,14 +136,31 @@ void ui_form::input(ui_input& input)
 
 void ui_form::render(std::shared_ptr<ui_draw> draw_ptr)
 {
+  auto style = get_style();
+  auto dimensions = get_dimensions();
+  auto window_radius = rounded_rect_radius(dimensions, style->m_window_rounding);
+
   // background
-  draw_ptr->draw_rectangle(get_dimensions(), get_style()->m_background);
+  if (style->m_window_rounding_enabled)
+    draw_rounded_rect_with_radius(draw_ptr, dimensions, style->m_background, window_radius, false);
+  else
+    draw_ptr->draw_rectangle(dimensions, style->m_background);
 
   // text area
-  auto text_dimension = get_dimensions();
-  text_dimension.m_h = get_style()->m_window_title_height;
-  draw_ptr->draw_rectangle(text_dimension, get_style()->m_foreground);
-  draw_ptr->draw_text(m_title, get_dimensions().m_x, get_dimensions().m_y, get_style()->m_accent);
+  auto text_dimension = dimensions;
+  text_dimension.m_h = style->m_window_title_height;
+
+  if (style->m_window_rounding_enabled)
+    draw_rounded_rect_with_radius(draw_ptr, text_dimension, style->m_foreground, window_radius, true);
+  else
+    draw_ptr->draw_rectangle(text_dimension, style->m_foreground);
+
+  auto title_x = dimensions.m_x;
+
+  if (style->m_window_rounding_enabled)
+    title_x += style->m_padding + window_radius * 0.5f;
+
+  draw_ptr->draw_text(m_title, title_x, dimensions.m_y, style->m_accent);
 
   // render all children
 

@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #include "external_input.h"
 
 Events::Events(event_handler _handler)
@@ -36,3 +38,5 @@ void Events::run_server(const char* name)
     DisconnectNamedPipe(pipe);
   }
 }
+
+#endif

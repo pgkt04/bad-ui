@@ -1,6 +1,8 @@
+#ifdef _WIN32
+
 #include <Windows.h>
 #include <cassert>
-#include "ui.h"
+#include "demo.h"
 #include "ui_win_input.h"
 #include "external_input.h"
 #include <d3d9.h>
@@ -92,82 +94,6 @@ public:
     D3DXCreateFontA(m_device, height, 0, (bold) ? FW_BOLD : FW_NORMAL, 1, (italic) ? 1 : 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, ANTIALIASED_QUALITY, DEFAULT_PITCH, caption, &m_font);
   }
 };
-
-std::shared_ptr<ui_form> get_ui()
-{
-  static bool selected = false;
-  static float tab2_slider_value = 0.5f;
-  static float subtab_slider_value = 0.25f;
-  static const char* dropdown_items[] = { "First", "Second", "Third" };
-  static int tab2_dropdown_value = 0;
-  static int subtab_dropdown_value = 1;
-
-  auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Title", 0, false);
-  {
-    auto tab = std::make_shared<ui_tab>("Tab 1");
-    {
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-      tab->push(std::make_shared<ui_checkbox>("Checkbox 3", &selected));
-    }
-    form->push(tab);
-
-    auto tab2 = std::make_shared<ui_tab>("Tab 2");
-    {
-      auto group1 = std::make_shared<ui_group>(true);
-      {
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 5", &selected));
-        group1->push(std::make_shared<ui_slider>("Tab 2 Slider", &tab2_slider_value));
-        group1->push(std::make_shared<ui_dropdown>("Tab 2 Mode", dropdown_items, 3, &tab2_dropdown_value));
-        group1->push(std::make_shared<ui_button>("Toggle Checks", [] { selected = !selected; }));
-
-        auto tab_group1 = std::make_shared<ui_tab>("Tab 1");
-        {
-          tab_group1->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-          tab_group1->push(std::make_shared<ui_slider>("Sub Slider", &subtab_slider_value));
-          tab_group1->push(std::make_shared<ui_dropdown>("Sub Mode", dropdown_items, 3, &subtab_dropdown_value));
-          tab_group1->push(std::make_shared<ui_button>("Sub Button", [] { selected = !selected; }));
-          tab_group1->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-        }
-        group1->push(tab_group1);
-
-        auto tab_group2 = std::make_shared<ui_tab>("Tab 2");
-        {
-          tab_group2->push(std::make_shared<ui_checkbox>("Checkbox 2", &selected));
-        }
-        group1->push(tab_group2);
-
-        group1->split();
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 5", &selected));
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 6", &selected));
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 7", &selected));
-        group1->split();
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 8", &selected));
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 9", &selected));
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 10", &selected));
-
-        auto group3 = std::make_shared<ui_group>(true);
-        {
-          group3->push(std::make_shared<ui_group>(true));
-          group3->push(std::make_shared<ui_checkbox>("Checkbox 10", &selected));
-        }
-        group1->push(group3);
-        group1->push(std::make_shared<ui_checkbox>("Checkbox 10", &selected));
-
-      }
-      tab2->push(group1);
-    }
-    form->push(tab2);
-  }
-
-  // some stuff at the end
-  // need to do live calculatations to automatically fill it into the correct place
-  //
-  form->push(std::make_shared<ui_checkbox>("Checkbox 9", &selected));
-  form->push(std::make_shared<ui_checkbox>("Checkbox 9", &selected));
-  form->push(std::make_shared<ui_checkbox>("Checkbox 9", &selected));
-
-  return form;
-}
 
 // Entry point
 //
@@ -264,17 +190,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
   draw_ptr->set_device(g_pd3dDevice);
   draw_ptr->set_font("Tahoma", 13, false, false);
 
-  // setup gui & colors here
-  auto color_scheme = std::make_shared< ui_style >();
-  color_scheme->m_accent = ui_color(255, 255, 255, 255);
-  color_scheme->m_background = ui_color(5, 5, 5, 255);
-  color_scheme->m_foreground = ui_color(0x2d, 0x30, 0x35, 255);
-  color_scheme->m_text = ui_color(255, 255, 255, 255);
-  color_scheme->m_control_height = 15.f;
-  color_scheme->m_padding = 5.f;
+  auto color_scheme = demo_create_style();
 
   // setup a template menu
-  g_form = get_ui();
+  g_form = demo_create_ui();
 
   MSG msg;
   ZeroMemory(&msg, sizeof(msg));
@@ -420,3 +339,5 @@ void reset_device()
 {
   auto hr = g_pd3dDevice->Reset(&g_d3dpp);
 }
+
+#endif

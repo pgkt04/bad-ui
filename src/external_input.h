@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef _WIN32
+
 #include "ui_defs.h"
 #include <process.h>
 #include <Windows.h>
@@ -26,3 +28,5 @@ private:
   HANDLE pipe;
   event_handler handler;
 };
+
+#endif

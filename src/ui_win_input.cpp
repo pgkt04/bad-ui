@@ -1,3 +1,5 @@
+#ifdef _WIN32
+
 #include "ui_win_input.h"
 
 ui_input win_input::get_input(UINT message, WPARAM wParam, LPARAM lParam)
@@ -39,3 +41,5 @@ ui_input win_input::get_input(UINT message, WPARAM wParam, LPARAM lParam)
 
   return ret;
 }
+
+#endif

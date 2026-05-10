@@ -1,0 +1,67 @@
+[
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter -x objective-c++ src/main_macos.mm -framework Cocoa",
+    "file": "/Users/j/fun/bad-ui/src/main_macos.mm"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/demo.cpp",
+    "file": "/Users/j/fun/bad-ui/src/demo.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_object.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_object.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_parent.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_parent.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_form.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_form.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_tab.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_tab.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_group.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_group.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_columns.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_columns.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_checkbox.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_checkbox.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_button.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_button.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_slider.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_slider.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_dropdown.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_dropdown.cpp"
+  },
+  {
+    "directory": "/Users/j/fun/bad-ui",
+    "command": "clang++ -std=c++11 -Wall -Wextra -Wno-unused-parameter src/ui_color_picker.cpp",
+    "file": "/Users/j/fun/bad-ui/src/ui_color_picker.cpp"
+  }
+]

@@ -84,7 +84,7 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
   }
 
   auto ignore_index = 0;
-  auto best_tab_pos = 0;
+  auto tab_y = dynamic_y;
 
   // Set children height and width
   //
@@ -93,7 +93,7 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
     child->set_dimensions(ui_dimension(
         child->get_is_tab() ? (this->get_is_tab() ? get_parent_dimensions().m_x : dimensions.m_x)
         + (dynamic_width * static_cast<float>(ignore_index)) : dynamic_x,
-        child->get_is_tab() ? (best_tab_pos != 0) ? best_tab_pos : dynamic_y : dynamic_y,
+        child->get_is_tab() ? tab_y : dynamic_y,
         child->get_is_tab() ? dynamic_width : (this->get_is_tab() ? get_parent_dimensions().m_w : dimensions.m_w),
         child->get_dynamic() ? dynamic_height : style_ptr->m_control_height
       ));
@@ -113,8 +113,6 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
           dynamic_y += sub_child->get_dimensions().m_h + (style_ptr->m_padding * 2) + style_ptr->m_control_height;
         }
       }
-
-      best_tab_pos = (int)dynamic_y;
 
       if (child->get_selected())
         dynamic_y += dynamic_height;

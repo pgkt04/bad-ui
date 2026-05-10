@@ -3,6 +3,7 @@ BUILD_DIR := build
 MACOS_APP := $(BUILD_DIR)/bad-ui-macos
 
 COMMON_SRC := \
+	src/demo.cpp \
 	src/ui_object.cpp \
 	src/ui_parent.cpp \
 	src/ui_form.cpp \
@@ -12,7 +13,8 @@ COMMON_SRC := \
 	src/ui_checkbox.cpp \
 	src/ui_button.cpp \
 	src/ui_slider.cpp \
-	src/ui_dropdown.cpp
+	src/ui_dropdown.cpp \
+	src/ui_color_picker.cpp
 
 .PHONY: macos clean
 

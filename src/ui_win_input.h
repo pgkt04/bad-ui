@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef _WIN32
+
 #include "ui_defs.h"
 #include <cstdint>
 #include <Windows.h>
@@ -10,3 +12,5 @@ namespace win_input
   //
   ui_input get_input(UINT message, WPARAM wParam, LPARAM lParam);
 }
+
+#endif

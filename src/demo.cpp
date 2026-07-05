@@ -51,7 +51,7 @@ std::shared_ptr<ui_form> demo_create_ui()
           basic_group->push(std::make_shared<ui_text>("Basic controls"));
           basic_group->push(std::make_shared<ui_checkbox>("Notifications", &notifications));
           basic_group->push(std::make_shared<ui_checkbox>("Compact mode", &compact_mode));
-          basic_group->push(std::make_shared<ui_slider>("Volume", &volume));
+          basic_group->push(std::make_shared<ui_slider>("Volume", &volume, true));
           basic_group->push(std::make_shared<ui_slider>("Brightness", &brightness));
           basic_group->push(std::make_shared<ui_dropdown>("Mode", mode_items, 3, &mode));
           basic_group->push(std::make_shared<ui_dropdown>("Quality", quality_items, 3, &quality));

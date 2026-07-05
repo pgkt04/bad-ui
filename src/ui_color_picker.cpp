@@ -528,5 +528,4 @@ void ui_color_picker::render(std::shared_ptr<ui_draw> draw_ptr)
 
   auto alpha_x = alpha_area.m_x + (clamp_channel(m_color->m_a) / 255.f) * alpha_area.m_w;
   draw_ptr->draw_line(alpha_x, alpha_area.m_y, alpha_x, alpha_area.m_y + alpha_area.m_h, style->m_text);
-  draw_ptr->draw_text("Alpha", alpha_area.m_x + style->m_padding, alpha_area.m_y, style->m_text);
 }

@@ -29,10 +29,11 @@ static ui_dimension get_slider_area(ui_dimension dimension, std::shared_ptr<ui_s
   );
 }
 
-ui_slider::ui_slider(const char* name, float* value)
+ui_slider::ui_slider(const char* name, float* value, bool show_value)
 {
   m_name = name;
   m_value = value;
+  m_show_value = show_value;
 }
 
 bool ui_slider::think(std::shared_ptr<ui_style> style_ptr)
@@ -76,13 +77,18 @@ void ui_slider::render(std::shared_ptr<ui_draw> draw_ptr)
   auto dim = get_dimensions();
   auto slider_area = get_slider_area(dim, style);
   auto value = clamp_slider_value(*m_value);
-  auto fill_area = slider_area;
+
+  // Skinny track centered in the row; the handle keeps the full control
+  // height. The input hit area stays the full row so it is easy to grab.
+  //
+  auto track = slider_area;
+  track.m_h = slider_area.m_h / 3.f;
+  track.m_y = slider_area.m_y + (slider_area.m_h - track.m_h) * 0.5f;
+
+  auto fill_area = track;
   fill_area.m_w *= value;
 
-  char value_text[32];
-  std::snprintf(value_text, sizeof(value_text), "%.2f", value);
-
-  draw_ptr->draw_rectangle(slider_area, style->m_foreground);
+  draw_ptr->draw_rectangle(track, style->m_foreground);
 
   if (fill_area.m_w > 0.f)
     draw_ptr->draw_rectangle(fill_area, style->m_accent);
@@ -92,8 +98,16 @@ void ui_slider::render(std::shared_ptr<ui_draw> draw_ptr)
   auto handle = ui_dimension(handle_x, slider_area.m_y, handle_width, slider_area.m_h);
   draw_ptr->draw_rectangle(handle, style->m_text);
 
-  auto value_text_x = slider_area.m_x + slider_area.m_w * 0.5f - 12.f;
-
-  draw_ptr->draw_text(m_name, dim.m_x, dim.m_y, style->m_text);
-  draw_ptr->draw_text(value_text, value_text_x, slider_area.m_y, style->m_text);
+  // Value rides along with the label instead of sitting on the slider body.
+  //
+  if (m_show_value)
+  {
+    char label[64];
+    std::snprintf(label, sizeof(label), "%s %.2f", m_name, value);
+    draw_ptr->draw_text(label, dim.m_x, dim.m_y, style->m_text);
+  }
+  else
+  {
+    draw_ptr->draw_text(m_name, dim.m_x, dim.m_y, style->m_text);
+  }
 }

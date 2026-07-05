@@ -339,9 +339,17 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
           dynamic_y += dynamic_height + style_ptr->m_padding;
 
         // set x padding for non auto-filling children (aka all controls)
+        // the row also shrinks by the same amount, otherwise it overhangs the
+        // parent by one padding and the controls' own right padding only
+        // cancels that overhang, leaving them flush against the right border
         //
         auto dim = child->get_dimensions();
         dim.m_x += style_ptr->m_padding;
+        dim.m_w -= style_ptr->m_padding;
+
+        if (dim.m_w < 0.f)
+          dim.m_w = 0.f;
+
         child->set_dimensions(dim);
       }
     }

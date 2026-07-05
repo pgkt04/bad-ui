@@ -278,6 +278,48 @@ static void draw_rect_border(std::shared_ptr<ui_draw> draw_ptr, ui_dimension dim
   draw_ptr->draw_rectangle(ui_dimension(dimension.m_x + dimension.m_w, dimension.m_y, 1.f, dimension.m_h), color);
 }
 
+// Composites a translucent color over a base color on the cpu, so alpha is
+// visible on any backend, even ones that cannot alpha blend.
+//
+static ui_color blend_over(ui_color base, ui_color color)
+{
+  auto alpha = clamp_channel(color.m_a) / 255.f;
+
+  return ui_color(
+    base.m_r + (clamp_channel(color.m_r) - base.m_r) * alpha,
+    base.m_g + (clamp_channel(color.m_g) - base.m_g) * alpha,
+    base.m_b + (clamp_channel(color.m_b) - base.m_b) * alpha,
+    255.f
+  );
+}
+
+static ui_color checker_color(int index)
+{
+  return (index & 1) ? ui_color(120, 120, 120, 255) : ui_color(190, 190, 190, 255);
+}
+
+// Transparency checkerboard with the color composited over it.
+//
+static void draw_color_swatch(std::shared_ptr<ui_draw> draw_ptr, ui_dimension area, ui_color color)
+{
+  auto cell = area.m_h * 0.5f;
+
+  if (cell <= 0.f)
+    return;
+
+  auto index = 0;
+
+  for (auto x = 0.f; x < area.m_w; x += cell, index++)
+  {
+    auto cell_w = gradient_cell_size(x, area.m_w, cell);
+
+    draw_ptr->draw_rectangle(ui_dimension(area.m_x + x, area.m_y, cell_w, cell),
+      blend_over(checker_color(index), color));
+    draw_ptr->draw_rectangle(ui_dimension(area.m_x + x, area.m_y + cell, cell_w, area.m_h - cell),
+      blend_over(checker_color(index + 1), color));
+  }
+}
+
 ui_color_picker::ui_color_picker(const char* name, ui_color* color)
 {
   m_name = name;
@@ -409,11 +451,11 @@ void ui_color_picker::render(std::shared_ptr<ui_draw> draw_ptr)
   auto button_area = get_picker_button_area(dim, style);
   auto swatch = ui_dimension(button_area.m_x + style->m_padding, button_area.m_y + 2.f, style->m_control_height * 2.f, button_area.m_h - 4.f);
   char hex[16];
-  std::snprintf(hex, sizeof(hex), "#%02X%02X%02X", channel_int(m_color->m_r), channel_int(m_color->m_g), channel_int(m_color->m_b));
+  std::snprintf(hex, sizeof(hex), "#%02X%02X%02X%02X", channel_int(m_color->m_r), channel_int(m_color->m_g), channel_int(m_color->m_b), channel_int(m_color->m_a));
 
   draw_ptr->draw_text(m_name, dim.m_x, dim.m_y, style->m_text);
   draw_ptr->draw_rectangle(button_area, style->m_foreground);
-  draw_ptr->draw_rectangle(swatch, *m_color);
+  draw_color_swatch(draw_ptr, swatch, *m_color);
   draw_ptr->draw_text(hex, swatch.m_x + swatch.m_w + style->m_padding, button_area.m_y, style->m_text);
   draw_ptr->draw_text(m_open ? "^" : "v", button_area.m_x + button_area.m_w - style->m_control_height, button_area.m_y, style->m_text);
 
@@ -467,10 +509,23 @@ void ui_color_picker::render(std::shared_ptr<ui_draw> draw_ptr)
   auto hue_x = hue_area.m_x + m_hue * hue_area.m_w;
   draw_ptr->draw_line(hue_x, hue_area.m_y, hue_x, hue_area.m_y + hue_area.m_h, style->m_text);
 
-  draw_ptr->draw_rectangle(alpha_area, style->m_foreground);
-  auto alpha_fill = alpha_area;
-  alpha_fill.m_w *= clamp_channel(m_color->m_a) / 255.f;
-  draw_ptr->draw_rectangle(alpha_fill, *m_color);
+  // Alpha bar: current color fading from transparent to opaque over a
+  // checkerboard, composited on the cpu so it reflects on any backend.
+  //
+  auto checker = alpha_area.m_h * 0.5f;
+  for (auto x = 0.f; x < alpha_area.m_w; x += step)
+  {
+    auto alpha = gradient_position(x + step * 0.5f, alpha_area.m_w, step) * 255.f;
+    auto cell_w = gradient_cell_size(x, alpha_area.m_w, step);
+    auto rgba = ui_color(m_color->m_r, m_color->m_g, m_color->m_b, alpha);
+    auto index = checker > 0.f ? static_cast<int>(x / checker) : 0;
+
+    draw_ptr->draw_rectangle(ui_dimension(alpha_area.m_x + x, alpha_area.m_y, cell_w, checker),
+      blend_over(checker_color(index), rgba));
+    draw_ptr->draw_rectangle(ui_dimension(alpha_area.m_x + x, alpha_area.m_y + checker, cell_w, alpha_area.m_h - checker),
+      blend_over(checker_color(index + 1), rgba));
+  }
+
   auto alpha_x = alpha_area.m_x + (clamp_channel(m_color->m_a) / 255.f) * alpha_area.m_w;
   draw_ptr->draw_line(alpha_x, alpha_area.m_y, alpha_x, alpha_area.m_y + alpha_area.m_h, style->m_text);
   draw_ptr->draw_text("Alpha", alpha_area.m_x + style->m_padding, alpha_area.m_y, style->m_text);

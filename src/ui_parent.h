@@ -11,6 +11,9 @@ class ui_parent : public ui_object
   bool m_scroll_dragging;
   float m_scroll_drag_offset;
   bool m_scroll_enabled;
+  // Separate from ui_object's press tracking: derived classes (tab, form)
+  // consume take_fresh_press for the same event before input_children runs.
+  bool m_scroll_mouse_was_down;
 
 public:
   ui_parent();

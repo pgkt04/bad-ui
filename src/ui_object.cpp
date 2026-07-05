@@ -10,6 +10,21 @@ ui_object::ui_object()
   m_is_group = false;
   m_render_last = false;
   m_selected = false;
+  m_mouse_was_down = false;
+}
+
+bool ui_object::take_fresh_press(ui_input& input)
+{
+  if (!input.mouse.buttons[ui_button_left])
+  {
+    m_mouse_was_down = false;
+    return false;
+  }
+
+  auto fresh = !m_mouse_was_down;
+  m_mouse_was_down = true;
+
+  return fresh;
 }
 
 void ui_object::set_dynamic(bool dynamic)

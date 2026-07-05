@@ -34,6 +34,7 @@ void ui_button::input(ui_input& input)
 
   auto button_area = get_button_area(get_dimensions(), style);
   auto in_button = UI_IN_AREA(input.mouse, button_area);
+  auto fresh_press = take_fresh_press(input);
 
   if (!input.mouse.buttons[ui_button_left])
   {
@@ -55,7 +56,7 @@ void ui_button::input(ui_input& input)
     return;
   }
 
-  if (in_button)
+  if (fresh_press && in_button)
   {
     m_pressed = true;
     input.handled = true;

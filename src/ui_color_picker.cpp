@@ -362,6 +362,7 @@ void ui_color_picker::input(ui_input& input)
   auto square_area = get_square_area(button_area, style);
   auto hue_area = get_hue_area(square_area, style);
   auto alpha_area = get_alpha_area(hue_area, style);
+  auto fresh_press = take_fresh_press(input);
 
   if (!input.mouse.buttons[ui_button_left])
   {
@@ -396,6 +397,12 @@ void ui_color_picker::input(ui_input& input)
     input.handled = true;
     return;
   }
+
+  // Only react to presses that started on this event; a button held down
+  // since a previous event belongs to another control's interaction.
+  //
+  if (!fresh_press)
+    return;
 
   if (UI_IN_AREA(input.mouse, button_area))
   {

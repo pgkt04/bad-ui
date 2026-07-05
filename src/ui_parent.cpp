@@ -9,6 +9,7 @@ ui_parent::ui_parent()
   m_scroll_dragging = false;
   m_scroll_drag_offset = 0.f;
   m_scroll_enabled = false;
+  m_scroll_mouse_was_down = false;
 }
 
 void ui_parent::add_child(std::shared_ptr<ui_object> object)
@@ -145,9 +146,13 @@ void ui_parent::input_children(ui_input& input, bool allow_scroll)
   if (!input.mouse.buttons[ui_button_left])
   {
     m_scroll_dragging = false;
+    m_scroll_mouse_was_down = false;
   }
   else if (scroll_active && style && max_scroll > 0.f)
   {
+    auto fresh_press = !m_scroll_mouse_was_down;
+    m_scroll_mouse_was_down = true;
+
     auto track = get_scrollbar_track(viewport);
     auto thumb = get_scrollbar_thumb(track, viewport.m_h, m_content_height, m_scroll_offset, style->m_control_height);
 
@@ -168,7 +173,10 @@ void ui_parent::input_children(ui_input& input, bool allow_scroll)
       return;
     }
 
-    if (UI_IN_AREA(input.mouse, thumb))
+    // Only grab the thumb on a fresh press; a drag wandering in from another
+    // control must not steal it.
+    //
+    if (fresh_press && UI_IN_AREA(input.mouse, thumb))
     {
       m_scroll_dragging = true;
       m_scroll_drag_offset = input.mouse.pos_y - thumb.m_y;

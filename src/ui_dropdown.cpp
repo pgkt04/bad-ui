@@ -71,6 +71,7 @@ void ui_dropdown::input(ui_input& input)
 
   auto button_area = get_dropdown_button_area(get_dimensions(), style);
   auto in_button = UI_IN_AREA(input.mouse, button_area);
+  auto fresh_press = take_fresh_press(input);
 
   if (!input.mouse.buttons[ui_button_left])
   {
@@ -85,6 +86,12 @@ void ui_dropdown::input(ui_input& input)
 
     return;
   }
+
+  // Only react to presses that started on this event; a button held down
+  // since a previous event belongs to another control's interaction.
+  //
+  if (!fresh_press)
+    return;
 
   m_pressed = true;
 

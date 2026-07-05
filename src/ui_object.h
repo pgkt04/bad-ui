@@ -20,6 +20,17 @@ class ui_object
 
   std::shared_ptr<ui_style> m_style;
   ui_input m_input;
+
+  bool m_mouse_was_down;
+
+protected:
+  // Tracks the left button state as seen by this object and reports whether
+  // this event is a fresh press (up -> down transition). Interactions must
+  // only start on a fresh press, so a button held down since a previous event
+  // (e.g. a drag started on another control) cannot start a new one here.
+  // Call once per input pass, before acting on the button state.
+  bool take_fresh_press(ui_input& input);
+
 public:
 
   /// Constructors / deconstructors

@@ -49,6 +49,7 @@ void ui_slider::input(ui_input& input)
     return;
 
   auto slider_area = get_slider_area(get_dimensions(), get_style());
+  auto fresh_press = take_fresh_press(input);
 
   if (!input.mouse.buttons[ui_button_left])
   {
@@ -56,15 +57,18 @@ void ui_slider::input(ui_input& input)
     return;
   }
 
-  if (UI_IN_AREA(input.mouse, slider_area))
+  if (!get_selected() && fresh_press && UI_IN_AREA(input.mouse, slider_area))
     set_selected(true);
 
-  if (get_selected() && slider_area.m_w > 0.f)
+  if (get_selected())
   {
-    auto value = (input.mouse.pos_x - slider_area.m_x) / slider_area.m_w;
-    *m_value = clamp_slider_value(value);
-  }
+    if (slider_area.m_w > 0.f)
+      *m_value = clamp_slider_value((input.mouse.pos_x - slider_area.m_x) / slider_area.m_w);
 
+    // Keep the drag captured so no other control reacts until release.
+    //
+    input.handled = true;
+  }
 }
 
 void ui_slider::render(std::shared_ptr<ui_draw> draw_ptr)

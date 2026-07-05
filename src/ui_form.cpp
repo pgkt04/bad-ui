@@ -192,6 +192,7 @@ void ui_form::input(ui_input& input)
     auto draggable_area = get_dimensions();
     draggable_area.m_h = style->m_window_title_height;
     auto grip_area = get_resize_grip_area(get_dimensions(), style);
+    auto fresh_press = take_fresh_press(input);
 
     if (!input.mouse.buttons[ui_button_left])
     {
@@ -203,7 +204,14 @@ void ui_form::input(ui_input& input)
       input.handled = true;
       return;
     }
-    else if (style->m_window_resize_enabled && UI_IN_AREA(input.mouse, grip_area))
+    else if (get_selected())
+    {
+      // Keep the title bar drag captured until release.
+      //
+      input.handled = true;
+      return;
+    }
+    else if (fresh_press && style->m_window_resize_enabled && UI_IN_AREA(input.mouse, grip_area))
     {
       m_resizing = true;
       set_selected(false);
@@ -211,7 +219,7 @@ void ui_form::input(ui_input& input)
       return;
     }
 
-    else if (UI_IN_AREA(input.mouse, draggable_area))
+    else if (fresh_press && UI_IN_AREA(input.mouse, draggable_area))
       set_selected(true);
   }
 

@@ -21,15 +21,26 @@ void ui_checkbox::input(ui_input& input)
   auto dimension = get_dimensions();
   auto box_area = ui_dimension(dimension.m_x, dimension.m_y,
     style->m_control_height, style->m_control_height);
+  auto fresh_press = take_fresh_press(input);
 
-  if (UI_IN_AREA(input.mouse, box_area) && input.mouse.buttons[ui_button_left])
+  if (!input.mouse.buttons[ui_button_left])
+  {
+    if (get_selected())
+    {
+      set_selected(false);
+      *m_checked = !(*m_checked);
+    }
+
+    return;
+  }
+
+  if (fresh_press && UI_IN_AREA(input.mouse, box_area))
     set_selected(true);
 
-  if (!input.mouse.buttons[ui_button_left] && get_selected())
-  {
-    set_selected(false);
-    *m_checked = !(*m_checked);
-  }
+  // Keep the press captured so no other control reacts until release.
+  //
+  if (get_selected())
+    input.handled = true;
 }
 
 void ui_checkbox::render(std::shared_ptr<ui_draw> draw_ptr)

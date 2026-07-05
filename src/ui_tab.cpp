@@ -67,10 +67,11 @@ void ui_tab::input(ui_input& input)
   /// if the area is pressed
   auto tab_area = get_dimensions();
   tab_area.m_h = get_style()->m_control_height;
+  auto fresh_press = take_fresh_press(input);
 
   if (input.mouse.buttons[ui_button_left])
   {
-    if (UI_IN_AREA(input.mouse, tab_area) && !m_button_pressed)
+    if (fresh_press && UI_IN_AREA(input.mouse, tab_area) && !m_button_pressed)
     {
       m_button_pressed = true;
     }

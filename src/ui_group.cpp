@@ -34,7 +34,6 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
 
   auto this_dimension = get_dimensions();
   auto cols = m_splits.size() + 1;
-  auto col_width = this_dimension.m_w / cols;
 
   if (!m_init)
   {
@@ -43,57 +42,22 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
     for (size_t i = 0; i < cols; i++)
       m_columns.push_back(std::make_shared<ui_column>(m_visible));
 
-    // determine where all the splits are and grab each object
+    // Assign every child to a column. m_splits holds the child indices where a
+    // new column begins, so a child's column is the number of splits recorded
+    // at or before it: children before the first split go to column 0, children
+    // between the first and second split go to column 1, and so on. This works
+    // for any column count (the previous version skipped the middle column once
+    // there were three or more).
     //
-    if (cols != 1)
+    size_t split_index = 0;
+
+    for (size_t i = 0; i < m_children.size(); i++)
     {
-      size_t cursor = 0;
-      size_t next_split = 0;
+      while (split_index < m_splits.size() &&
+             static_cast<size_t>(m_splits[split_index]) <= i)
+        split_index += 1;
 
-      for (size_t i = 0; i < m_children.size(); i++)
-      {
-        // if we hit the split or we used up all our splits
-        //
-        bool last_col = i == (m_children.size() - 1);
-
-        if (i == static_cast<size_t>(m_splits[next_split]) || last_col)
-        {
-          size_t extra = 0;
-
-          if (last_col)
-          {
-            next_split += 1;
-            extra += 1;
-          }
-
-          // relocate all children from where we began to where we hit the split
-          //
-          for (size_t j = cursor; j < i + extra; j++)
-          {
-            m_columns[next_split]->push(m_children[j]);
-            cursor += 1;
-          }
-
-          // increment to next split if possible
-          //
-          if (next_split + 1 < m_splits.size())
-            next_split += 1;
-        }
-
-        // set all the childrens width to the desired width
-        //
-        //auto child_dimensions = get_children()[i]->get_dimensions();
-        //child_dimensions.m_w = col_width;
-        //get_children()[i]->set_dimensions(child_dimensions);
-
-      }
-    }
-    else
-    {
-      // just a regular column
-      //
-      for (auto child : m_children)
-        m_columns[0]->push(child);
+      m_columns[split_index]->push(m_children[i]);
     }
 
     for (auto col : m_columns)
@@ -105,17 +69,35 @@ bool ui_group::think(std::shared_ptr<ui_style> style_ptr)
     m_init = true;
   }
 
-  // Invisible groups are layout wrappers only: they split space, but do not
-  // add frame padding of their own. Visible groups let their columns draw the
-  // frame, so the columns should fill the whole allocated group area.
-  auto inset = m_visible ? style_ptr->m_padding : 0.f;
+  // Horizontal spacing is uniform across both layout styles: every rendered
+  // group frame keeps a single `padding` outer margin and a single `padding`
+  // gutter between neighbours. Frames are placed on this grid:
+  //
+  //   frame_x[i] = x + padding + (frame_width + padding) * i
+  //
+  // How the grid is reached differs by group kind:
+  //   * Visible group: its own columns draw the frames, so the columns sit on
+  //     the grid directly (child_pad = 0).
+  //   * Invisible group: it is a layout rail whose columns each host a visible
+  //     child group, and that child insets itself by `padding` on both sides.
+  //     We therefore grow each column box by `padding` per side (and shift it
+  //     left to match) so the child's own inset lands its frame back on the
+  //     grid. Without this compensation two neighbouring child groups would
+  //     each add a `padding` margin and double the gap between them.
+  auto outer = style_ptr->m_padding;
+  auto gutter = style_ptr->m_padding;
+  auto col_count = static_cast<float>(cols);
+  auto frame_width = (this_dimension.m_w - outer * 2.f - gutter * (col_count - 1.f)) / col_count;
+  auto child_pad = m_visible ? 0.f : style_ptr->m_padding;
   int i = 0;
   for (auto child : get_children())
   {
+    auto frame_x = this_dimension.m_x + outer + (frame_width + gutter) * static_cast<float>(i);
+
     auto dim = child->get_dimensions();
-    dim.m_x = this_dimension.m_x + col_width * i + inset;
+    dim.m_x = frame_x - child_pad;
     dim.m_y = this_dimension.m_y;
-    dim.m_w = col_width - inset * 2.f;
+    dim.m_w = frame_width + child_pad * 2.f;
     dim.m_h = this_dimension.m_h;
 
     if (dim.m_w < 0.f)

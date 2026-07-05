@@ -3,18 +3,18 @@
 std::shared_ptr<ui_style> demo_create_style()
 {
   auto style = std::make_shared<ui_style>();
-  style->m_accent = ui_color(255, 132, 92, 255);
-  style->m_background = ui_color(14, 15, 20, 255);
-  style->m_foreground = ui_color(45, 51, 61, 255);
-  style->m_text = ui_color(242, 237, 229, 255);
-  style->m_border = ui_color(72, 81, 96, 255);
+  style->m_accent = ui_color(224, 82, 74, 255);
+  style->m_background = ui_color(28, 28, 30, 255);
+  style->m_foreground = ui_color(46, 46, 50, 255);
+  style->m_text = ui_color(200, 200, 200, 255);
+  style->m_border = ui_color(168, 56, 50, 255);
   style->m_control_height = 15.f;
   style->m_padding = 5.f;
-  style->m_window_rounding_enabled = true;
+  style->m_window_rounding_enabled = false;
   style->m_window_rounding = 0.08f;
   style->m_window_resize_enabled = true;
   style->m_hide_os_cursor = true;
-  style->m_group_rounding_enabled = true;
+  style->m_group_rounding_enabled = false;
   style->m_group_rounding = 0.025f;
   return style;
 }
@@ -33,6 +33,12 @@ std::shared_ptr<ui_form> demo_create_ui()
   static int mode = 0;
   static int quality = 2;
   static ui_color demo_color = ui_color(255, 132, 92, 255);
+  static bool grid_a = true;
+  static bool grid_b = false;
+  static bool grid_c = true;
+  static float grid_weight_a = 0.4f;
+  static float grid_weight_b = 0.6f;
+  static float grid_weight_c = 0.3f;
 
   auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Bad UI Demo", 0, false);
   {
@@ -118,6 +124,57 @@ std::shared_ptr<ui_form> demo_create_ui()
       layout_tab->push(layout_group);
     }
     form->push(layout_tab);
+
+    auto grid_tab = std::make_shared<ui_tab>("Grid");
+    {
+      // Three separate visible groups laid out side by side by an invisible
+      // wrapper (two splits). Use it to confirm the outer margins and every
+      // gutter are one padding, exactly like the two-column tabs.
+      auto grid_group = std::make_shared<ui_group>(false);
+      {
+        auto grid_group_a = std::make_shared<ui_group>(true);
+        {
+          grid_group_a->push(std::make_shared<ui_text>("Column A"));
+          grid_group_a->push(std::make_shared<ui_checkbox>("Enable A", &grid_a));
+          grid_group_a->push(std::make_shared<ui_slider>("Weight A", &grid_weight_a));
+          grid_group_a->push(std::make_shared<ui_dropdown>("Mode", mode_items, 3, &mode));
+        }
+        grid_group->push(grid_group_a);
+
+        grid_group->split();
+        auto grid_group_b = std::make_shared<ui_group>(true);
+        {
+          grid_group_b->push(std::make_shared<ui_text>("Column B"));
+          grid_group_b->push(std::make_shared<ui_checkbox>("Enable B", &grid_b));
+          grid_group_b->push(std::make_shared<ui_slider>("Weight B", &grid_weight_b));
+          grid_group_b->push(std::make_shared<ui_button>("Reset B", [] { grid_weight_b = 0.5f; }));
+        }
+        grid_group->push(grid_group_b);
+
+        grid_group->split();
+        auto grid_group_c = std::make_shared<ui_group>(true);
+        {
+          grid_group_c->push(std::make_shared<ui_text>("Column C"));
+          grid_group_c->push(std::make_shared<ui_checkbox>("Enable C", &grid_c));
+          grid_group_c->push(std::make_shared<ui_slider>("Weight C", &grid_weight_c));
+          grid_group_c->push(std::make_shared<ui_dropdown>("Quality", quality_items, 3, &quality));
+        }
+        grid_group->push(grid_group_c);
+
+        grid_group->split();
+        auto grid_group_d = std::make_shared<ui_group>(true);
+        {
+            grid_group_d->push(std::make_shared<ui_text>("Column C"));
+            grid_group_d->push(std::make_shared<ui_checkbox>("Enable C", &grid_c));
+            grid_group_d->push(std::make_shared<ui_slider>("Weight C", &grid_weight_c));
+            grid_group_d->push(std::make_shared<ui_dropdown>("Quality", quality_items, 3, &quality));
+        }
+        grid_group->push(grid_group_d);
+
+      }
+      grid_tab->push(grid_group);
+    }
+    form->push(grid_tab);
 
     auto colors_tab = std::make_shared<ui_tab>("Colors");
     {

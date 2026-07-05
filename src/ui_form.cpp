@@ -239,10 +239,12 @@ void ui_form::render(std::shared_ptr<ui_draw> draw_ptr)
   else
     draw_ptr->draw_rectangle(text_dimension, style->m_foreground);
 
-  auto title_x = dimensions.m_x;
+  // Inset the title by one padding from the window edge (matching the tab
+  // text). Rounded windows push it in a little further to clear the corner.
+  auto title_x = dimensions.m_x + style->m_padding;
 
   if (style->m_window_rounding_enabled)
-    title_x += style->m_padding + window_radius * 0.5f;
+    title_x += window_radius * 0.5f;
 
   draw_ptr->draw_text(m_title, title_x, dimensions.m_y, style->m_accent);
 

@@ -42,7 +42,7 @@ public:
     m_device = device;
   }
 
-  virtual void draw_line(float x0, float y0, float x1, float y1, ui_color color) override
+  virtual void impl_draw_line(float x0, float y0, float x1, float y1, ui_color color) override
   {
     assert(m_device);
 
@@ -56,7 +56,7 @@ public:
     m_Line->Release();
   }
 
-  virtual void draw_rectangle(ui_dimension dimension, ui_color color) override
+  virtual void impl_draw_rectangle(ui_dimension dimension, ui_color color) override
   {
     assert(m_device);
 
@@ -64,7 +64,7 @@ public:
     m_device->Clear(1, &BarRect, 0x00000001, color.get_argb(), 0, 0);
   }
 
-  virtual void draw_text(const char* text, float x, float y, ui_color color) override
+  virtual void impl_draw_text(const char* text, float x, float y, ui_color color) override
   {
     assert(m_font);
     auto rect = RECT{ (LONG)x, (LONG)y, (LONG)x, (LONG)y };
@@ -85,6 +85,31 @@ public:
       break;
     default:
       break;
+    }
+  }
+
+  // Scissor rect so partially visible text is clipped pixel perfect.
+  // Rectangles/lines are pre-clipped by ui_draw (Clear ignores the scissor).
+  //
+  virtual void apply_clip(const ui_dimension* clip) override
+  {
+    assert(m_device);
+
+    if (clip)
+    {
+      RECT rect = {
+        (LONG)clip->m_x,
+        (LONG)clip->m_y,
+        (LONG)(clip->m_x + clip->m_w),
+        (LONG)(clip->m_y + clip->m_h)
+      };
+
+      m_device->SetScissorRect(&rect);
+      m_device->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
+    }
+    else
+    {
+      m_device->SetRenderState(D3DRS_SCISSORTESTENABLE, FALSE);
     }
   }
 

@@ -74,12 +74,34 @@ static bool fits_vertical(ui_dimension dimension, ui_dimension viewport)
   return dimension.m_y >= viewport.m_y && dimension.m_y + dimension.m_h <= viewport.m_y + viewport.m_h;
 }
 
-static bool is_child_visible(std::shared_ptr<ui_object> child, ui_dimension viewport)
+static bool is_child_visible(std::shared_ptr<ui_object> child, ui_dimension viewport, bool allow_partial)
 {
-  if (child->get_dynamic())
+  // Scroll containers draw partially visible children clipped against the
+  // viewport instead of hiding them, so a row sliding out at the edge stays
+  // half visible instead of popping in and out.
+  if (child->get_dynamic() || allow_partial)
     return intersects_vertical(child->get_dimensions(), viewport);
 
   return fits_vertical(child->get_dimensions(), viewport);
+}
+
+static bool can_child_take_input(std::shared_ptr<ui_object> child, ui_dimension viewport, ui_input& input, bool allow_partial)
+{
+  if (!is_child_visible(child, viewport, allow_partial))
+    return false;
+
+  // Partially visible children only react while the mouse is inside the
+  // viewport, so their clipped part cannot be clicked through the border.
+  // Popups (render_last) overflow the viewport by design.
+  if (allow_partial && !child->get_dynamic() && !fits_vertical(child->get_dimensions(), viewport))
+  {
+    if (child->get_render_last())
+      return true;
+
+    return UI_IN_AREA(input.mouse, viewport);
+  }
+
+  return true;
 }
 
 static ui_dimension get_scrollbar_track(ui_dimension viewport)
@@ -164,7 +186,7 @@ void ui_parent::input_children(ui_input& input, bool allow_scroll)
 
   for (auto child : get_children())
   {
-    if (child->get_render_last() && is_child_visible(child, viewport))
+    if (child->get_render_last() && can_child_take_input(child, viewport, input, scroll_active))
     {
       child->input(input);
 
@@ -175,7 +197,7 @@ void ui_parent::input_children(ui_input& input, bool allow_scroll)
 
   for (auto child : get_children())
   {
-    if (!child->get_render_last() && is_child_visible(child, viewport))
+    if (!child->get_render_last() && can_child_take_input(child, viewport, input, scroll_active))
     {
       child->input(input);
 
@@ -325,7 +347,10 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
     }
   }
 
-  m_content_height = dynamic_y - content_start_y;
+  // Content spans from the viewport top, so include the leading padding.
+  // This keeps a padding-sized gap under the last child when scrolled all
+  // the way down, matching the gap above the first child at the top.
+  m_content_height = (dynamic_y - content_start_y) + style_ptr->m_padding;
 
   max_scroll = m_content_height > viewport.m_h ? m_content_height - viewport.m_h : 0.f;
   m_scroll_offset = clamp_scroll_value(m_scroll_offset, max_scroll);
@@ -386,16 +411,35 @@ void ui_parent::render_children(std::shared_ptr<ui_draw> draw_ptr, bool draw_scr
 {
   auto style = get_style();
   auto viewport = style ? get_scroll_viewport(this, style) : get_dimensions();
+  auto clip_children = draw_scrollbar && m_scroll_enabled;
 
-  for (auto child : get_children())
+  if (clip_children)
   {
-    if (!child->get_render_last() && is_child_visible(child, viewport))
-      child->render(draw_ptr);
+    // Inset by one pixel so clipped children do not paint over the border of
+    // the column that owns this viewport.
+    auto clip = viewport;
+    clip.m_x += 1.f;
+    clip.m_y += 1.f;
+    clip.m_w -= 2.f;
+    clip.m_h -= 2.f;
+
+    draw_ptr->push_clip(clip);
   }
 
   for (auto child : get_children())
   {
-    if (child->get_render_last() && is_child_visible(child, viewport))
+    if (!child->get_render_last() && is_child_visible(child, viewport, clip_children))
+      child->render(draw_ptr);
+  }
+
+  if (clip_children)
+    draw_ptr->pop_clip();
+
+  // Popups (render_last) draw unclipped so they can overflow the viewport.
+  //
+  for (auto child : get_children())
+  {
+    if (child->get_render_last() && is_child_visible(child, viewport, clip_children))
       child->render(draw_ptr);
   }
 

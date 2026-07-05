@@ -40,18 +40,26 @@ class ui_macos_wrapper : public ui_draw
 {
   CGContextRef m_context;
   NSFont* m_font;
+  bool m_clipped;
 
 public:
   explicit ui_macos_wrapper(CGContextRef context)
   {
     m_context = context;
+    m_clipped = false;
     m_font = [NSFont fontWithName:@"Tahoma" size:13.0];
 
     if (!m_font)
       m_font = [NSFont systemFontOfSize:13.0];
   }
 
-  virtual void draw_line(float x0, float y0, float x1, float y1, ui_color color) override
+  virtual ~ui_macos_wrapper()
+  {
+    if (m_clipped)
+      CGContextRestoreGState(m_context);
+  }
+
+  virtual void impl_draw_line(float x0, float y0, float x1, float y1, ui_color color) override
   {
     assert(m_context);
 
@@ -62,7 +70,7 @@ public:
     CGContextStrokePath(m_context);
   }
 
-  virtual void draw_rectangle(ui_dimension dimension, ui_color color) override
+  virtual void impl_draw_rectangle(ui_dimension dimension, ui_color color) override
   {
     assert(m_context);
 
@@ -70,7 +78,7 @@ public:
     CGContextFillRect(m_context, CGRectMake(dimension.m_x, dimension.m_y, dimension.m_w, dimension.m_h));
   }
 
-  virtual void draw_text(const char* text, float x, float y, ui_color color) override
+  virtual void impl_draw_text(const char* text, float x, float y, ui_color color) override
   {
     if (!text)
       return;
@@ -82,6 +90,27 @@ public:
     };
 
     [string drawAtPoint:NSMakePoint(x, y) withAttributes:attributes];
+  }
+
+  // CGContext clipping is destructive, so wrap it in a saved graphics state
+  // that gets restored whenever the clip rect changes or clears.
+  //
+  virtual void apply_clip(const ui_dimension* clip) override
+  {
+    assert(m_context);
+
+    if (m_clipped)
+    {
+      CGContextRestoreGState(m_context);
+      m_clipped = false;
+    }
+
+    if (clip)
+    {
+      CGContextSaveGState(m_context);
+      CGContextClipToRect(m_context, CGRectMake(clip->m_x, clip->m_y, clip->m_w, clip->m_h));
+      m_clipped = true;
+    }
   }
 };
 

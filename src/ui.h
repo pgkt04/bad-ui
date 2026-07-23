@@ -19,6 +19,7 @@
 #include "ui_checkbox.h"
 #include "ui_button.h"
 #include "ui_text.h"
+#include "ui_separator.h"
 #include "ui_slider.h"
 #include "ui_dropdown.h"
 #include "ui_color_picker.h"

@@ -281,6 +281,12 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
   auto max_scroll = m_content_height > viewport.m_h ? m_content_height - viewport.m_h : 0.f;
   m_scroll_offset = clamp_scroll_value(m_scroll_offset, max_scroll);
 
+  // While the scrollbar shows (content overflows), reserve its lane on the
+  // right so it does not overlap full-width children. Track width plus its
+  // 2px inset plus a 2px gap. Uses last frame's content height, which is fine
+  // since layout runs every frame.
+  auto scroll_reserve = m_scroll_enabled && max_scroll > 0.f ? 10.f : 0.f;
+
   auto ignore_index = 0;
   auto tab_y = dynamic_y;
   auto tabs_started = false;
@@ -299,7 +305,7 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
         child->get_is_tab() ? (this->get_is_tab() ? get_parent_dimensions().m_x : dimensions.m_x)
         + (dynamic_width * static_cast<float>(ignore_index)) : dynamic_x,
         (child->get_is_tab() ? tab_y : dynamic_y) - m_scroll_offset,
-        child->get_is_tab() ? dynamic_width : (this->get_is_tab() ? get_parent_dimensions().m_w : dimensions.m_w),
+        child->get_is_tab() ? dynamic_width : (this->get_is_tab() ? get_parent_dimensions().m_w : dimensions.m_w) - scroll_reserve,
         child->get_dynamic() ? dynamic_height : style_ptr->m_control_height
       ));
 

@@ -140,7 +140,7 @@ void ui_dropdown::render(std::shared_ptr<ui_draw> draw_ptr)
   draw_ptr->draw_text(m_name, dim.m_x, dim.m_y, style->m_text);
   draw_ptr->draw_rectangle(button_area, style->m_foreground);
   draw_ptr->draw_text(selected_text, button_area.m_x + style->m_padding, button_area.m_y, style->m_text);
-  draw_ptr->draw_text(m_open ? "^" : "v", button_area.m_x + button_area.m_w - style->m_control_height, button_area.m_y, style->m_text);
+  draw_ptr->draw_chevron(ui_dimension(button_area.m_x + button_area.m_w - style->m_control_height, button_area.m_y, style->m_control_height, button_area.m_h), m_open, style->m_text);
 
   if (!m_open || m_item_count <= 0 || !m_items)
     return;

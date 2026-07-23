@@ -69,6 +69,24 @@ public:
     impl_draw_text(text, x, y, color);
   }
 
+  // Composite helper: chevron pointing up or down, centered inside the given
+  // area. Drawn with lines so it scales with the control instead of relying
+  // on the backend font having a nice looking "v" glyph.
+  //
+  void draw_chevron(ui_dimension area, bool up, ui_color color)
+  {
+    auto size = area.m_w < area.m_h ? area.m_w : area.m_h;
+    auto half_w = size * 0.25f;
+    auto half_h = size * 0.14f;
+    auto cx = area.m_x + area.m_w * 0.5f;
+    auto cy = area.m_y + area.m_h * 0.5f;
+    auto tip = up ? cy - half_h : cy + half_h;
+    auto base = up ? cy + half_h : cy - half_h;
+
+    draw_line(cx - half_w, base, cx, tip, color);
+    draw_line(cx, tip, cx + half_w, base, color);
+  }
+
   // Clip rects nest; pushed rects are intersected with the active one.
   //
   void push_clip(ui_dimension dimension)

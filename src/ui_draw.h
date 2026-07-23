@@ -2,6 +2,7 @@
 
 #include "ui_defs.h"
 
+#include <cstring>
 #include <vector>
 
 /// Implementing a text size calculator may come in great use!
@@ -87,6 +88,17 @@ public:
     draw_line(cx, tip, cx + half_w, base, color);
   }
 
+  // Text width in pixels. Backends with real font metrics override
+  // impl_measure_text; the default is a rough 8px-per-character estimate.
+  //
+  float measure_text(const char* text)
+  {
+    if (!text)
+      return 0.f;
+
+    return impl_measure_text(text);
+  }
+
   // Clip rects nest; pushed rects are intersected with the active one.
   //
   void push_clip(ui_dimension dimension)
@@ -130,6 +142,11 @@ protected:
   virtual void impl_draw_line(float x0, float y0, float x1, float y1, ui_color color) = 0;
   virtual void impl_draw_rectangle(ui_dimension dimension, ui_color color) = 0;
   virtual void impl_draw_text(const char* text, float x, float y, ui_color color) = 0;
+
+  virtual float impl_measure_text(const char* text)
+  {
+    return static_cast<float>(std::strlen(text)) * 8.f;
+  }
 
   // Optional: backends with hardware clipping (scissor rect, CGContext clip,
   // ImGui PushClipRect, ...) can override this for pixel perfect text

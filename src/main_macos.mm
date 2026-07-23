@@ -92,6 +92,16 @@ public:
     [string drawAtPoint:NSMakePoint(x, y) withAttributes:attributes];
   }
 
+  virtual float impl_measure_text(const char* text) override
+  {
+    NSString* string = [NSString stringWithUTF8String:text];
+
+    if (!string)
+      return 0.f;
+
+    return static_cast<float>([string sizeWithAttributes:@{ NSFontAttributeName: m_font }].width);
+  }
+
   // CGContext clipping is destructive, so wrap it in a saved graphics state
   // that gets restored whenever the clip rect changes or clears.
   //

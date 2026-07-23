@@ -88,6 +88,14 @@ public:
     }
   }
 
+  virtual float impl_measure_text(const char* text) override
+  {
+    assert(m_font);
+    auto rect = RECT{ 0, 0, 0, 0 };
+    m_font->DrawTextA(NULL, text, -1, &rect, DT_CALCRECT | DT_LEFT | DT_NOCLIP, 0);
+    return static_cast<float>(rect.right - rect.left);
+  }
+
   // Scissor rect so partially visible text is clipped pixel perfect.
   // Rectangles/lines are pre-clipped by ui_draw (Clear ignores the scissor).
   //

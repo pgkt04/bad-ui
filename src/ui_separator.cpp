@@ -1,7 +1,5 @@
 #include "ui_separator.h"
 
-#include <cstring>
-
 ui_separator::ui_separator(const char* name)
 {
   m_name = name;
@@ -28,15 +26,17 @@ void ui_separator::render(std::shared_ptr<ui_draw> draw_ptr)
   auto line_x = dim.m_x;
   auto line_y = dim.m_y + style->m_control_height * 0.5f - 1.f;
 
-  // Labeled separators start the line right after the text. ui_draw has no
-  // text metrics, so the width is estimated at 8px per character (same
-  // convention as ui_text::get_min_width); a fixed label column would leave
-  // a hole between short labels and the line start.
+  // Labeled separators draw a short lead line, the text, then the line to the
+  // row end, using the backend's measured text width.
   //
   if (m_name)
   {
-    draw_ptr->draw_text(m_name, dim.m_x, dim.m_y, style->m_text);
-    line_x += static_cast<float>(std::strlen(m_name)) * 8.f + style->m_padding;
+    auto lead_w = style->m_control_height;
+    auto text_x = dim.m_x + lead_w + style->m_padding;
+
+    draw_ptr->draw_rectangle(ui_dimension(dim.m_x, line_y, lead_w, 2.f), style->m_foreground);
+    draw_ptr->draw_text(m_name, text_x, dim.m_y, style->m_text);
+    line_x = text_x + draw_ptr->measure_text(m_name) + style->m_padding;
   }
 
   // Rows span to the parent's right edge; controls trim one padding off their

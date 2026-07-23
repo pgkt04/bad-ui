@@ -37,6 +37,9 @@ ui_tab::ui_tab(const char* name)
 {
   set_dynamic(true);
   set_is_tab(true);
+  // Tabs scroll their content by default when it no longer fits; the
+  // scrollbar only shows up while there is actual overflow.
+  set_scroll_enabled(true);
 
   m_name = name;
   m_button_pressed = false;

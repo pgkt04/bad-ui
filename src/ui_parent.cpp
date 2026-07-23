@@ -55,6 +55,11 @@ static ui_dimension get_scroll_viewport(ui_object* object, std::shared_ptr<ui_st
 
   if (object->get_is_tab())
   {
+    // A tab's own dimensions only cover its strip button (the strip width is
+    // split across all tabs); its content spans the parent's full width.
+    auto parent = object->get_parent_dimensions();
+    dimensions.m_x = parent.m_x;
+    dimensions.m_w = parent.m_w;
     dimensions.m_y += style->m_control_height;
     dimensions.m_h -= style->m_control_height;
   }
@@ -265,6 +270,14 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
     dynamic_width /= static_cast<float>(hidden_objects);
   }
 
+  // Fixed-height children can demand more room than the parent has. Dynamic
+  // children must not go negative then, otherwise the layout walks backwards
+  // and the measured content height underreports the overflow.
+  auto dynamic_fits = dynamic_height > 0.f;
+
+  if (dynamic_height < 0.f)
+    dynamic_height = 0.f;
+
   auto max_scroll = m_content_height > viewport.m_h ? m_content_height - viewport.m_h : 0.f;
   m_scroll_offset = clamp_scroll_value(m_scroll_offset, max_scroll);
 
@@ -368,6 +381,13 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
   // the way down, matching the gap above the first child at the top.
   m_content_height = (dynamic_y - content_start_y) + style_ptr->m_padding;
 
+  // Dynamic children absorb whatever space is left, so while they still have
+  // any height the content fits the viewport by construction. The measurement
+  // above counts their trailing padding and would otherwise report a phantom
+  // overflow that shows a needless scrollbar.
+  if ((dynamic_objects > 0 || hidden_objects > 0) && dynamic_fits)
+    m_content_height = viewport.m_h;
+
   max_scroll = m_content_height > viewport.m_h ? m_content_height - viewport.m_h : 0.f;
   m_scroll_offset = clamp_scroll_value(m_scroll_offset, max_scroll);
 
@@ -427,7 +447,10 @@ void ui_parent::render_children(std::shared_ptr<ui_draw> draw_ptr, bool draw_scr
 {
   auto style = get_style();
   auto viewport = style ? get_scroll_viewport(this, style) : get_dimensions();
-  auto clip_children = draw_scrollbar && m_scroll_enabled;
+  // Only clip while the content actually overflows. When everything fits the
+  // clip would do nothing but shave the border of children that sit flush
+  // with the viewport edges.
+  auto clip_children = draw_scrollbar && m_scroll_enabled && m_content_height > viewport.m_h;
 
   if (clip_children)
   {

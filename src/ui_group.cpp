@@ -4,6 +4,9 @@ ui_group::ui_group(bool visible)
 {
   set_dynamic(true);
   set_is_group(true);
+  // Groups scroll by default: the flag is forwarded to the columns that hold
+  // the actual children, and the scrollbar only appears on overflow.
+  set_scroll_enabled(true);
 
   m_visible = visible;
   m_object_count = 0;

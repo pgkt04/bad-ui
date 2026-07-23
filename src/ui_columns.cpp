@@ -60,6 +60,7 @@ ui_column::ui_column(bool visible)
 {
   set_dynamic(true);
   set_is_col(true);
+  set_scroll_enabled(true);
 
   m_visible = visible;
 }
@@ -69,10 +70,19 @@ void ui_column::push(std::shared_ptr<ui_object> object)
   add_child(object);
 }
 
+// Invisible columns are pure layout rails for dynamic child groups: those
+// shrink with the rail instead of overflowing it, and the rail measures its
+// content against shifted dimensions (see think), so scrolling there would
+// only produce a phantom scrollbar.
+bool ui_column::scroll_allowed()
+{
+  return get_scroll_enabled() && m_visible;
+}
+
 void ui_column::input(ui_input& input)
 {
   set_input(input);
-  input_children(input, get_scroll_enabled());
+  input_children(input, scroll_allowed());
 }
 
 bool ui_column::think(std::shared_ptr<ui_style> style_ptr)
@@ -136,5 +146,5 @@ void ui_column::render(std::shared_ptr<ui_draw> draw_ptr)
     draw_rounded_rect(draw_ptr, inner, style->m_background, radius);
   }
 
-  render_children(draw_ptr, get_scroll_enabled());
+  render_children(draw_ptr, scroll_allowed());
 }

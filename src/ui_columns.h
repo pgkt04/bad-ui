@@ -5,6 +5,8 @@
 class ui_column : public ui_parent
 {
   bool m_visible;
+
+  bool scroll_allowed();
 public:
   ui_column(bool visible);
   void push(std::shared_ptr<ui_object> object);

@@ -70,7 +70,6 @@ std::shared_ptr<ui_form> demo_create_ui()
         controls_group->push(color_group);
 
         auto scroll_group = std::make_shared<ui_group>(true);
-        scroll_group->set_scroll_enabled(true);
         {
           scroll_group->push(std::make_shared<ui_text>("Scrollable demo"));
           scroll_group->push(std::make_shared<ui_checkbox>("List item 01", &scroll_items[0]));

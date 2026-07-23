@@ -13,18 +13,35 @@ static float clamp_slider_value(float value)
   return value;
 }
 
-static ui_dimension get_slider_area(ui_dimension dimension, std::shared_ptr<ui_style> style)
+// Width reserved right of the track for the value text. ui_draw has no text
+// metrics, so this is a fixed slot sized for "0.00" that scales with the
+// style instead of a measured width.
+//
+static float get_value_slot_width(std::shared_ptr<ui_style> style)
+{
+  return style->m_control_height * 2.f;
+}
+
+static ui_dimension get_slider_area(ui_dimension dimension, std::shared_ptr<ui_style> style, bool show_value)
 {
   auto label_width = 100.f;
   auto right_padding = style->m_padding;
 
+  if (show_value)
+    right_padding += get_value_slot_width(style) + style->m_padding;
+
   if (dimension.m_w <= label_width + right_padding)
     label_width = 0.f;
+
+  auto width = dimension.m_w - label_width - right_padding;
+
+  if (width < 0.f)
+    width = 0.f;
 
   return ui_dimension(
     dimension.m_x + label_width,
     dimension.m_y,
-    dimension.m_w - label_width - right_padding,
+    width,
     style->m_control_height
   );
 }
@@ -48,7 +65,7 @@ void ui_slider::input(ui_input& input)
   if (!get_style())
     return;
 
-  auto slider_area = get_slider_area(get_dimensions(), get_style());
+  auto slider_area = get_slider_area(get_dimensions(), get_style(), m_show_value);
   auto fresh_press = take_fresh_press(input);
 
   if (!input.mouse.buttons[ui_button_left])
@@ -79,39 +96,36 @@ void ui_slider::render(std::shared_ptr<ui_draw> draw_ptr)
     return;
 
   auto dim = get_dimensions();
-  auto slider_area = get_slider_area(dim, style);
+  auto slider_area = get_slider_area(dim, style, m_show_value);
   auto value = clamp_slider_value(*m_value);
 
-  // Skinny track centered in the row; the handle keeps the full control
-  // height. The input hit area stays the full row so it is easy to grab.
+  // Line style track: thin dim line for the remaining range, thicker accent
+  // line for the filled range, and a vertical tick as the handle. The input
+  // hit area stays the full row height so the track is easy to grab.
   //
-  auto track = slider_area;
-  track.m_h = slider_area.m_h / 3.f;
-  track.m_y = slider_area.m_y + (slider_area.m_h - track.m_h) * 0.5f;
+  auto center_y = slider_area.m_y + slider_area.m_h * 0.5f;
+  auto fill_w = slider_area.m_w * value;
 
-  auto fill_area = track;
-  fill_area.m_w *= value;
+  if (fill_w < slider_area.m_w)
+    draw_ptr->draw_rectangle(ui_dimension(slider_area.m_x + fill_w, center_y - 1.f, slider_area.m_w - fill_w, 2.f), style->m_foreground);
 
-  draw_ptr->draw_rectangle(track, style->m_foreground);
+  if (fill_w > 0.f)
+    draw_ptr->draw_rectangle(ui_dimension(slider_area.m_x, center_y - 2.f, fill_w, 4.f), style->m_accent);
 
-  if (fill_area.m_w > 0.f)
-    draw_ptr->draw_rectangle(fill_area, style->m_accent);
-
-  auto handle_width = 4.f;
-  auto handle_x = slider_area.m_x + ((slider_area.m_w - handle_width) * value);
-  auto handle = ui_dimension(handle_x, slider_area.m_y, handle_width, slider_area.m_h);
-  draw_ptr->draw_rectangle(handle, style->m_text);
-
-  // Value rides along with the label instead of sitting on the slider body.
+  // Tick handle rides the end of the fill; kept inside the track so it never
+  // clips outside the control at 0 or 1.
   //
+  auto tick_w = 4.f;
+  auto tick_h = slider_area.m_h * 0.8f;
+  auto tick_x = slider_area.m_x + (slider_area.m_w - tick_w) * value;
+  draw_ptr->draw_rectangle(ui_dimension(tick_x, center_y - tick_h * 0.5f, tick_w, tick_h), style->m_accent);
+
+  draw_ptr->draw_text(m_name, dim.m_x, dim.m_y, style->m_text);
+
   if (m_show_value)
   {
-    char label[64];
-    std::snprintf(label, sizeof(label), "%s %.2f", m_name, value);
-    draw_ptr->draw_text(label, dim.m_x, dim.m_y, style->m_text);
-  }
-  else
-  {
-    draw_ptr->draw_text(m_name, dim.m_x, dim.m_y, style->m_text);
+    char label[16];
+    std::snprintf(label, sizeof(label), "%.2f", value);
+    draw_ptr->draw_text(label, slider_area.m_x + slider_area.m_w + style->m_padding, dim.m_y, style->m_text);
   }
 }

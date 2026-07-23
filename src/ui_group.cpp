@@ -129,3 +129,37 @@ void ui_group::render(std::shared_ptr<ui_draw> draw_ptr)
 {
   render_children(draw_ptr, false);
 }
+
+float ui_group::get_min_width(std::shared_ptr<ui_style> style)
+{
+  // Works off the original children and split points (same mapping as the
+  // column assignment in think), so it is valid before init too. Every column
+  // needs the width of its widest child; rows get one padding of inset while
+  // nested groups bring their own margins.
+  auto cols = m_splits.size() + 1;
+  std::vector<float> col_min(cols, 0.f);
+  size_t split_index = 0;
+
+  for (size_t i = 0; i < m_children.size(); i++)
+  {
+    while (split_index < m_splits.size() &&
+           static_cast<size_t>(m_splits[split_index]) <= i)
+      split_index += 1;
+
+    auto child_min = m_children[i]->get_min_width(style);
+
+    if (!m_children[i]->get_is_group())
+      child_min += style->m_padding;
+
+    if (child_min > col_min[split_index])
+      col_min[split_index] = child_min;
+  }
+
+  // Outer margins plus one gutter between neighbouring columns.
+  auto total = style->m_padding * 2.f + style->m_padding * static_cast<float>(cols - 1);
+
+  for (auto width : col_min)
+    total += width;
+
+  return total;
+}

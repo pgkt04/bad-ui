@@ -11,6 +11,10 @@ class ui_parent : public ui_object
   bool m_scroll_dragging;
   float m_scroll_drag_offset;
   bool m_scroll_enabled;
+  // Whether the scrollbar lane (track + reserved width) is currently held.
+  // Decided at the end of each relocation pass from the freshly measured
+  // content height, consumed by the next pass.
+  bool m_scroll_lane_active;
   // Separate from ui_object's press tracking: derived classes (tab, form)
   // consume take_fresh_press for the same event before input_children runs.
   bool m_scroll_mouse_was_down;
@@ -26,4 +30,5 @@ public:
   void handle_relocations(std::shared_ptr<ui_style> style_ptr);
   void render_children(std::shared_ptr<ui_draw> draw_ptr, bool draw_scrollbar = true);
   void render_scrollbar(std::shared_ptr<ui_draw> draw_ptr);
+  virtual float get_min_width(std::shared_ptr<ui_style> style) override;
 };

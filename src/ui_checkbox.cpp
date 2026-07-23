@@ -1,5 +1,7 @@
 #include "ui_checkbox.h"
 
+#include <cstring>
+
 ui_checkbox::ui_checkbox(const char* name, bool* checked)
 {
   m_name = name;
@@ -64,4 +66,12 @@ void ui_checkbox::render(std::shared_ptr<ui_draw> draw_ptr)
   draw_ptr->draw_rectangle(dim, base_col);
   draw_ptr->draw_text(m_name, dim.m_x + dim.m_w + style->m_padding,
     dim.m_y, style->m_text);
+}
+
+float ui_checkbox::get_min_width(std::shared_ptr<ui_style> style)
+{
+  // Box, one padding, then the label at ~8px per character.
+  auto label = m_name ? static_cast<float>(std::strlen(m_name)) * 8.f : 0.f;
+
+  return style->m_control_height + style->m_padding + label + style->m_padding;
 }

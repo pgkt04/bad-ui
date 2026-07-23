@@ -77,4 +77,9 @@ public:
   virtual void input(ui_input& input) = 0;
   virtual bool think(std::shared_ptr<ui_style> style_ptr) = 0;
   virtual void render(std::shared_ptr<ui_draw> draw_ptr) = 0;
+
+  // Minimum width this object needs to stay usable. The library has no text
+  // metrics, so controls report conservative estimates; containers aggregate
+  // their children. Used by the form's dynamic minimum size.
+  virtual float get_min_width(std::shared_ptr<ui_style> style);
 };

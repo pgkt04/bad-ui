@@ -140,3 +140,11 @@ void ui_object::set_input(ui_input input)
   m_input = input;
 }
 
+float ui_object::get_min_width(std::shared_ptr<ui_style> style)
+{
+  // Labeled rows (slider, dropdown, checkbox, ...) reserve 100px for the
+  // label; leave at least a label plus a workable field.
+  (void)style;
+  return 160.f;
+}
+

@@ -80,3 +80,11 @@ void ui_button::render(std::shared_ptr<ui_draw> draw_ptr)
   draw_ptr->draw_rectangle(button_area, m_pressed ? style->m_accent : style->m_foreground);
   draw_ptr->draw_text(m_name, text_x, button_area.m_y, style->m_text);
 }
+
+float ui_button::get_min_width(std::shared_ptr<ui_style> style)
+{
+  // Centered label at ~8px per character plus a padding on each side.
+  auto label = m_name ? static_cast<float>(std::strlen(m_name)) * 8.f : 0.f;
+
+  return label + style->m_padding * 2.f;
+}

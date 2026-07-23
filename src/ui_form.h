@@ -18,6 +18,13 @@ class ui_form : public ui_parent
   ui_mouse m_mouse;
   ui_mouse m_last_mouse;
   bool m_resizing;
+  // Offset between the cursor and the window's bottom-right corner when the
+  // resize started. Resizing tracks the cursor absolutely with this anchor
+  // instead of accumulating per-frame deltas, so a drag clamped at the
+  // minimum size does not jitter and only resumes once the cursor is back at
+  // the corner.
+  float m_resize_anchor_x;
+  float m_resize_anchor_y;
 
   int m_last_tab;
 public:

@@ -536,3 +536,15 @@ void ui_color_picker::render(std::shared_ptr<ui_draw> draw_ptr)
   auto alpha_x = alpha_area.m_x + (clamp_channel(m_color->m_a) / 255.f) * alpha_area.m_w;
   draw_ptr->draw_line(alpha_x, alpha_area.m_y, alpha_x, alpha_area.m_y + alpha_area.m_h, style->m_text);
 }
+
+float ui_color_picker::get_min_width(std::shared_ptr<ui_style> style)
+{
+  // Label column, swatch, hex text (#RRGGBBAA at ~8px per character) and the
+  // open/close arrow. Mirrors the fixed offsets used in render.
+  auto label_width = 100.f;
+  auto swatch = style->m_padding + style->m_control_height * 2.f;
+  auto hex = style->m_padding + 9.f * 8.f;
+  auto arrow = style->m_control_height + style->m_padding;
+
+  return label_width + swatch + hex + arrow;
+}

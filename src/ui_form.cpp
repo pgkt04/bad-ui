@@ -124,6 +124,8 @@ ui_form::ui_form(ui_dimension dimensions, const char* title, int tab_setting, bo
   m_mouse = {};
   m_last_mouse = {};
   m_resizing = false;
+  m_resize_anchor_x = 0.f;
+  m_resize_anchor_y = 0.f;
   m_last_tab = -1;
 }
 
@@ -136,6 +138,43 @@ void ui_form::push(std::shared_ptr<ui_object> object)
   add_child(object);
 }
 
+// Minimum window size: the static style values, and with m_window_min_dynamic
+// also whatever the currently selected tab's content needs. Width only -
+// vertical overflow is covered by scrolling, horizontal is not.
+static void get_min_window_size(ui_parent* parent, std::shared_ptr<ui_style> style, float& min_width, float& min_height)
+{
+  min_width = style->m_window_min_width;
+  min_height = style->m_window_min_height;
+
+  if (!style->m_window_min_dynamic)
+    return;
+
+  auto tab_count = 0.f;
+
+  for (auto child : parent->get_children())
+  {
+    if (child->get_is_tab())
+    {
+      tab_count += 1.f;
+
+      if (!child->get_selected())
+        continue;
+    }
+
+    auto child_min = child->get_min_width(style);
+
+    if (child_min > min_width)
+      min_width = child_min;
+  }
+
+  // The strip splits the width evenly across the tab buttons; keep each one
+  // wide enough to stay readable and clickable.
+  auto strip_min = tab_count * 60.f;
+
+  if (strip_min > min_width)
+    min_width = strip_min;
+}
+
 bool ui_form::think(std::shared_ptr<ui_style> style_ptr)
 {
   set_style(style_ptr);
@@ -145,16 +184,22 @@ bool ui_form::think(std::shared_ptr<ui_style> style_ptr)
   m_mouse.pos_x = get_input().mouse.pos_x;
   m_mouse.pos_y = get_input().mouse.pos_y;
 
+  float min_width, min_height;
+  get_min_window_size(this, style_ptr, min_width, min_height);
+
   if (m_resizing)
   {
+    // Track the cursor absolutely via the anchor grabbed on the press. Delta
+    // accumulation would jitter once the size clamps at the minimum: leftward
+    // movement gets swallowed by the clamp but any rightward wiggle would
+    // still grow the window even with the cursor far past the corner.
     auto dimensions = get_dimensions();
-    auto delta_x = (m_mouse.pos_x - m_last_mouse.pos_x);
-    auto delta_y = (m_mouse.pos_y - m_last_mouse.pos_y);
-    dimensions.m_w = max_float(dimensions.m_w + delta_x, 220.f);
-    dimensions.m_h = max_float(dimensions.m_h + delta_y, 160.f);
+    auto width = (m_mouse.pos_x + m_resize_anchor_x) - dimensions.m_x;
+    auto height = (m_mouse.pos_y + m_resize_anchor_y) - dimensions.m_y;
+    dimensions.m_w = max_float(width, min_width);
+    dimensions.m_h = max_float(height, min_height);
 
-    if (std::abs(delta_x) > 1.f || std::abs(delta_y) > 1.f)
-      set_dimensions(dimensions);
+    set_dimensions(dimensions);
   }
   // apply dragging
   else if (get_selected())
@@ -167,6 +212,19 @@ bool ui_form::think(std::shared_ptr<ui_style> style_ptr)
 
     if (std::abs(delta_x) > 1.f || std::abs(delta_y) > 1.f)
       set_dimensions(dimensions);
+  }
+
+  // Enforce the minimum even outside of resizing, so e.g. switching to a tab
+  // that needs more room grows the window.
+  {
+    auto dimensions = get_dimensions();
+
+    if (dimensions.m_w < min_width || dimensions.m_h < min_height)
+    {
+      dimensions.m_w = max_float(dimensions.m_w, min_width);
+      dimensions.m_h = max_float(dimensions.m_h, min_height);
+      set_dimensions(dimensions);
+    }
   }
 
   handle_relocations(style_ptr);
@@ -213,7 +271,10 @@ void ui_form::input(ui_input& input)
     }
     else if (fresh_press && style->m_window_resize_enabled && UI_IN_AREA(input.mouse, grip_area))
     {
+      auto dimensions = get_dimensions();
       m_resizing = true;
+      m_resize_anchor_x = (dimensions.m_x + dimensions.m_w) - input.mouse.pos_x;
+      m_resize_anchor_y = (dimensions.m_y + dimensions.m_h) - input.mouse.pos_y;
       set_selected(false);
       input.handled = true;
       return;

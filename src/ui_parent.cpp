@@ -10,6 +10,7 @@ ui_parent::ui_parent()
   m_scroll_drag_offset = 0.f;
   m_scroll_enabled = false;
   m_scroll_mouse_was_down = false;
+  m_scroll_lane_active = false;
 }
 
 void ui_parent::add_child(std::shared_ptr<ui_object> object)
@@ -281,11 +282,14 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
   auto max_scroll = m_content_height > viewport.m_h ? m_content_height - viewport.m_h : 0.f;
   m_scroll_offset = clamp_scroll_value(m_scroll_offset, max_scroll);
 
-  // While the scrollbar shows (content overflows), reserve its lane on the
-  // right so it does not overlap full-width children. Track width plus its
-  // 2px inset plus a 2px gap. Uses last frame's content height, which is fine
-  // since layout runs every frame.
-  auto scroll_reserve = m_scroll_enabled && max_scroll > 0.f ? 10.f : 0.f;
+  // The scrollbar lane (track width + its 2px inset + a 2px gap) is reserved
+  // so the track does not overlap full-width children. The lane state was
+  // decided at the end of the previous relocation pass from the content
+  // height it measured; deciding it here against the stale height would
+  // latch the lane on any shrink and never release it for containers whose
+  // content tracks the viewport (dynamic children snap content to viewport,
+  // so no slack-based release condition can ever fire).
+  auto scroll_reserve = m_scroll_enabled && m_scroll_lane_active ? 10.f : 0.f;
 
   auto ignore_index = 0;
   auto tab_y = dynamic_y;
@@ -396,6 +400,11 @@ void ui_parent::handle_relocations(std::shared_ptr<ui_style> style_ptr)
 
   max_scroll = m_content_height > viewport.m_h ? m_content_height - viewport.m_h : 0.f;
   m_scroll_offset = clamp_scroll_value(m_scroll_offset, max_scroll);
+
+  // Decide the lane for the next pass from the fresh measurement. The lane
+  // only reserves width and the content height only measures heights, so
+  // there is no feedback loop that could flicker the children's width.
+  m_scroll_lane_active = m_scroll_enabled && max_scroll > 0.f;
 
   int selected_tabs = 0;
 
@@ -509,4 +518,25 @@ void ui_parent::render_scrollbar(std::shared_ptr<ui_draw> draw_ptr)
 
   draw_ptr->draw_rectangle(track, style->m_foreground);
   draw_ptr->draw_rectangle(thumb, style->m_accent);
+}
+
+float ui_parent::get_min_width(std::shared_ptr<ui_style> style)
+{
+  auto min_width = 0.f;
+
+  for (auto child : get_children())
+  {
+    auto child_min = child->get_min_width(style);
+
+    // Plain rows are inset by one padding inside their container (their own
+    // right padding is part of the control itself); groups manage their own
+    // margins.
+    if (!child->get_is_group())
+      child_min += style->m_padding;
+
+    if (child_min > min_width)
+      min_width = child_min;
+  }
+
+  return min_width;
 }

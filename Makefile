@@ -14,6 +14,9 @@ COMMON_SRC := \
 	src/ui_button.cpp \
 	src/ui_text.cpp \
 	src/ui_separator.cpp \
+	src/ui_swatch.cpp \
+	src/ui_node.cpp \
+	src/ui_canvas.cpp \
 	src/ui_slider.cpp \
 	src/ui_dropdown.cpp \
 	src/ui_color_picker.cpp

@@ -2,6 +2,7 @@
 
 #include "ui_defs.h"
 
+#include <cmath>
 #include <cstring>
 #include <vector>
 
@@ -86,6 +87,61 @@ public:
 
     draw_line(cx - half_w, base, cx, tip, color);
     draw_line(cx, tip, cx + half_w, base, color);
+  }
+
+  // Composite helper: filled circle from 1px horizontal scanline rects, so it
+  // needs no backend primitive and clips like everything else. Intended for
+  // small radii (node ports, knobs); cost grows linearly with the radius.
+  //
+  void draw_circle(float cx, float cy, float radius, ui_color color)
+  {
+    if (radius <= 0.f)
+      return;
+
+    // Sample row centers so the disc spans 2r both ways and radii < 1 still
+    // draw one row.
+    //
+    for (auto dy = -radius + 0.5f; dy < radius; dy += 1.f)
+    {
+      auto half = std::sqrt(radius * radius - dy * dy);
+
+      draw_rectangle(ui_dimension(cx - half, cy + dy - 0.5f, half * 2.f, 1.f), color);
+    }
+  }
+
+  // Composite helper: cubic bezier flattened into line segments. Segment
+  // count follows the control-polygon length (an upper bound on the curve
+  // length), so backward-routed curves with close endpoints stay smooth.
+  //
+  void draw_bezier(float x0, float y0, float cx0, float cy0, float cx1, float cy1, float x1, float y1, ui_color color)
+  {
+    auto leg = [](float ax, float ay, float bx, float by)
+    {
+      return std::sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+    };
+    auto length = leg(x0, y0, cx0, cy0) + leg(cx0, cy0, cx1, cy1) + leg(cx1, cy1, x1, y1);
+    auto segments = static_cast<int>(length / 8.f);
+
+    if (segments < 8)
+      segments = 8;
+
+    if (segments > 32)
+      segments = 32;
+
+    auto px = x0;
+    auto py = y0;
+
+    for (auto i = 1; i <= segments; i++)
+    {
+      auto t = static_cast<float>(i) / static_cast<float>(segments);
+      auto u = 1.f - t;
+      auto x = u * u * u * x0 + 3.f * u * u * t * cx0 + 3.f * u * t * t * cx1 + t * t * t * x1;
+      auto y = u * u * u * y0 + 3.f * u * u * t * cy0 + 3.f * u * t * t * cy1 + t * t * t * y1;
+
+      draw_line(px, py, x, y, color);
+      px = x;
+      py = y;
+    }
   }
 
   // Text width in pixels. Backends with real font metrics override

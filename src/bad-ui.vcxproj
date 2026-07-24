@@ -157,6 +157,9 @@
     <ClCompile Include="ui_slider.cpp" />
     <ClCompile Include="ui_text.cpp" />
     <ClCompile Include="ui_separator.cpp" />
+    <ClCompile Include="ui_swatch.cpp" />
+    <ClCompile Include="ui_node.cpp" />
+    <ClCompile Include="ui_canvas.cpp" />
     <ClCompile Include="ui_win_input.cpp" />
     <ClCompile Include="ui_object.cpp" />
     <ClCompile Include="ui_tab.cpp" />
@@ -175,6 +178,9 @@
     <ClInclude Include="ui_slider.h" />
     <ClInclude Include="ui_text.h" />
     <ClInclude Include="ui_separator.h" />
+    <ClInclude Include="ui_swatch.h" />
+    <ClInclude Include="ui_node.h" />
+    <ClInclude Include="ui_canvas.h" />
     <ClInclude Include="ui_win_input.h" />
     <ClInclude Include="ui_object.h" />
     <ClInclude Include="ui_defs.h" />

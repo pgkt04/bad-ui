@@ -39,6 +39,12 @@ std::shared_ptr<ui_form> demo_create_ui()
   static float grid_weight_a = 0.4f;
   static float grid_weight_b = 0.6f;
   static float grid_weight_c = 0.3f;
+  static float node_src_a[3] = { 0.9f, 0.15f, 0.1f };
+  static float node_src_b[3] = { 0.2f, 0.85f, 0.2f };
+  static float node_combine[3] = { 0.f, 0.f, 0.f };
+  static ui_color node_src_a_color;
+  static ui_color node_src_b_color;
+  static ui_color node_combine_color;
 
   auto form = std::make_shared<ui_form>(ui_dimension(30, 30, 800, 400), "Bad UI Demo", 0, false);
   {
@@ -176,6 +182,68 @@ std::shared_ptr<ui_form> demo_create_ui()
       grid_tab->push(grid_group);
     }
     form->push(grid_tab);
+
+    auto nodes_tab = std::make_shared<ui_tab>("Nodes");
+    {
+      auto canvas = std::make_shared<ui_canvas>();
+
+      auto make_color_node = [](const char* title, float x, float y, float* rgb, ui_color* color)
+      {
+        auto node = std::make_shared<ui_node>(title, x, y);
+        node->push(std::make_shared<ui_swatch>(color));
+        node->push(std::make_shared<ui_slider>("R", &rgb[0]));
+        node->push(std::make_shared<ui_slider>("G", &rgb[1]));
+        node->push(std::make_shared<ui_slider>("B", &rgb[2]));
+        return node;
+      };
+
+      auto source_a = make_color_node("Source A", 40, 30, node_src_a, &node_src_a_color);
+      auto source_b = make_color_node("Source B", 40, 190, node_src_b, &node_src_b_color);
+      auto combine = make_color_node("Combine", 380, 100, node_combine, &node_combine_color);
+
+      auto out_a = source_a->add_output(0);
+      source_b->add_output(0);
+      auto in_r = combine->add_input(1);
+      combine->add_input(2);
+      combine->add_input(3);
+
+      canvas->push(source_a);
+      canvas->push(source_b);
+      canvas->push(combine);
+      canvas->connect(source_a.get(), out_a, combine.get(), in_r);
+
+      // Graph evaluation: source swatches follow their sliders; a wire into
+      // Combine's R/G/B input (port rows 1..3) copies that channel from the
+      // connected source.
+      //
+      auto src_a = source_a.get();
+      auto src_b = source_b.get();
+      auto canvas_ptr = canvas.get();
+
+      canvas->set_on_think([src_a, src_b, canvas_ptr]
+      {
+        node_src_a_color = ui_color(node_src_a[0] * 255.f, node_src_a[1] * 255.f, node_src_a[2] * 255.f, 255.f);
+        node_src_b_color = ui_color(node_src_b[0] * 255.f, node_src_b[1] * 255.f, node_src_b[2] * 255.f, 255.f);
+
+        for (auto& wire : canvas_ptr->get_wires())
+        {
+          auto channel = wire.m_to->get_port(wire.m_in_port).m_row - 1;
+
+          if (channel < 0 || channel > 2)
+            continue;
+
+          auto source = wire.m_from == src_a ? node_src_a : wire.m_from == src_b ? node_src_b : nullptr;
+
+          if (source)
+            node_combine[channel] = source[channel];
+        }
+
+        node_combine_color = ui_color(node_combine[0] * 255.f, node_combine[1] * 255.f, node_combine[2] * 255.f, 255.f);
+      });
+
+      nodes_tab->push(canvas);
+    }
+    form->push(nodes_tab);
 
     auto colors_tab = std::make_shared<ui_tab>("Colors");
     {
